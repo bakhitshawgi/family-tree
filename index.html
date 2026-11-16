@@ -1,0 +1,1642 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>شجرة العائلة</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#0B1220">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="شجرة العائلة">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="icon-192.png">
+<meta name="robots" content="noindex,nofollow">
+<style>
+  @font-face{font-family:'Tajawal';font-style:normal;font-weight:400;font-display:swap;src:url(fonts/tajawal-arabic-400-normal.woff2) format('woff2');unicode-range:U+0600-06FF,U+0750-077F,U+0870-088E,U+0890-0891,U+0897-08E1,U+08E3-08FF,U+200C-200E,U+2010-2011,U+204F,U+2E41,U+FB50-FDFF,U+FE70-FE74,U+FE76-FEFC;}
+  @font-face{font-family:'Tajawal';font-style:normal;font-weight:400;font-display:swap;src:url(fonts/tajawal-latin-400-normal.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
+  @font-face{font-family:'Tajawal';font-style:normal;font-weight:500;font-display:swap;src:url(fonts/tajawal-arabic-500-normal.woff2) format('woff2');unicode-range:U+0600-06FF,U+0750-077F,U+0870-088E,U+0890-0891,U+0897-08E1,U+08E3-08FF,U+200C-200E,U+2010-2011,U+204F,U+2E41,U+FB50-FDFF,U+FE70-FE74,U+FE76-FEFC;}
+  @font-face{font-family:'Tajawal';font-style:normal;font-weight:500;font-display:swap;src:url(fonts/tajawal-latin-500-normal.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
+  @font-face{font-family:'Tajawal';font-style:normal;font-weight:700;font-display:swap;src:url(fonts/tajawal-arabic-700-normal.woff2) format('woff2');unicode-range:U+0600-06FF,U+0750-077F,U+0870-088E,U+0890-0891,U+0897-08E1,U+08E3-08FF,U+200C-200E,U+2010-2011,U+204F,U+2E41,U+FB50-FDFF,U+FE70-FE74,U+FE76-FEFC;}
+  @font-face{font-family:'Tajawal';font-style:normal;font-weight:700;font-display:swap;src:url(fonts/tajawal-latin-700-normal.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
+  @font-face{font-family:'Tajawal';font-style:normal;font-weight:800;font-display:swap;src:url(fonts/tajawal-arabic-800-normal.woff2) format('woff2');unicode-range:U+0600-06FF,U+0750-077F,U+0870-088E,U+0890-0891,U+0897-08E1,U+08E3-08FF,U+200C-200E,U+2010-2011,U+204F,U+2E41,U+FB50-FDFF,U+FE70-FE74,U+FE76-FEFC;}
+  @font-face{font-family:'Tajawal';font-style:normal;font-weight:800;font-display:swap;src:url(fonts/tajawal-latin-800-normal.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
+  :root{
+    --ink:#F3F4F6; --ink-soft:#A9B4C8;
+    --paper:#0B1220; --paper-raised:#131C2E; --raised-2:#1E2A44;
+    --gold:#F5B544; --gold-deep:#F5B544; --gold-bg:#1E2A44;
+    --btn:#F5B544; --on-btn:#1A1300;
+    --living:#6EE7A0; --living-bg:#12301F;
+    --deceased:#A3ABB8; --deceased-bg:#1F2937;
+    --line:#24304A; --danger:#F87171; --danger-bg:#3A1518;
+    --info:#93C5FD; --info-bg:#172A46;
+    color-scheme:dark;
+    --radius:18px; --shadow:0 2px 10px rgba(34,48,63,0.08);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;background:var(--paper);color:var(--ink);font-family:'Tajawal','Segoe UI',Tahoma,sans-serif;}
+  body{min-height:100vh;}
+  button,input,textarea,select{font-family:inherit;color:inherit;}
+  .hidden{display:none !important;}
+  .muted{color:var(--ink-soft);} .small{font-size:12px;}
+  .hint{font-size:11.5px;color:var(--ink-soft);margin-top:4px;line-height:1.5;}
+
+  /* LOGIN */
+  .login-screen{min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:32px 22px;max-width:440px;margin:0 auto;position:relative;}
+  .login-brand{text-align:center;margin-bottom:22px;}
+  .login-brand .mark{width:64px;height:64px;border-radius:20px;background:var(--paper-raised);border:1px solid var(--line);color:var(--gold);display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 12px;}
+  .login-brand h1{font-size:20px;margin:0;font-weight:800;}
+  .login-brand p{font-size:13px;color:var(--ink-soft);margin:4px 0 0;}
+  .field{margin-bottom:12px;}
+  .field label{display:block;font-size:12.5px;font-weight:700;color:var(--ink-soft);margin-bottom:6px;}
+  .field input,.field select,.field textarea{width:100%;padding:12px 13px;border-radius:12px;border:1.5px solid var(--line);background:var(--paper-raised);font-size:15px;}
+  .field input:focus,.field select:focus,.field textarea:focus{outline:2px solid var(--gold);border-color:var(--gold);}
+  .login-btn{width:100%;padding:14px;border:none;border-radius:12px;background:var(--btn);color:var(--on-btn);font-weight:800;font-size:15px;cursor:pointer;margin-top:6px;}
+  .login-error,.form-error{background:var(--danger-bg);color:var(--danger);border-radius:10px;padding:9px 12px;font-size:13px;margin-bottom:12px;font-weight:700;display:none;}
+  .demo-box{margin-top:22px;background:var(--paper-raised);border:1px dashed var(--line);border-radius:14px;padding:12px 14px;}
+  .demo-box p{margin:0 0 8px;font-size:12px;color:var(--ink-soft);font-weight:700;}
+  .demo-acc{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--line);font-size:12.5px;gap:8px;}
+  .demo-acc:last-child{border-bottom:none;}
+  .demo-acc button{background:var(--gold);color:var(--on-btn);border:none;border-radius:999px;padding:5px 12px;font-size:11.5px;font-weight:700;cursor:pointer;flex:0 0 auto;}
+  .login-lang{position:absolute;top:16px;inset-inline-end:16px;}
+  .login-lang button{background:none;border:1.5px solid var(--line);color:var(--ink-soft);border-radius:999px;padding:6px 14px;font-size:12.5px;font-weight:700;cursor:pointer;}
+  .proto-note{margin-top:14px;font-size:11.5px;color:var(--ink-soft);line-height:1.6;text-align:center;}
+
+  /* SHELL */
+  #appShell{display:none;padding-bottom:80px;min-height:100vh;}
+  header.app-bar{position:sticky;top:0;z-index:40;background:var(--paper);color:var(--ink);border-bottom:1px solid var(--line);padding:10px 14px;display:flex;align-items:center;justify-content:space-between;box-shadow:var(--shadow);gap:8px;}
+  header.app-bar .brand{font-weight:800;font-size:17px;display:flex;align-items:center;gap:8px;}
+  header.app-bar .brand .dot{width:8px;height:8px;border-radius:50%;background:var(--gold);}
+  .bar-actions{display:flex;align-items:center;gap:6px;}
+  .icon-btn{position:relative;background:var(--paper-raised);border:none;color:var(--ink);min-width:36px;height:36px;border-radius:999px;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0 10px;font-weight:700;}
+  .badge{position:absolute;top:-4px;inset-inline-end:-4px;background:var(--danger);color:#1A0606;font-size:10px;font-weight:800;min-width:16px;height:16px;border-radius:999px;display:flex;align-items:center;justify-content:center;padding:0 3px;}
+  .lang-btn{background:var(--gold);color:var(--on-btn);border:none;border-radius:999px;padding:7px 13px;font-weight:700;font-size:13px;cursor:pointer;}
+  .notif-panel{position:fixed;top:58px;inset-inline-end:10px;width:310px;max-height:70vh;overflow-y:auto;background:var(--paper-raised);border-radius:16px;box-shadow:0 8px 24px rgba(0,0,0,0.18);z-index:60;border:1px solid var(--line);display:none;}
+  .notif-panel.open{display:block;}
+  .notif-panel-head{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-bottom:1px solid var(--line);}
+  .notif-panel-head button{background:none;border:none;color:var(--gold-deep);font-size:12px;font-weight:700;cursor:pointer;}
+  .notif-item{padding:11px 14px;border-bottom:1px solid var(--line);font-size:13px;}
+  .notif-item:last-child{border-bottom:none;}
+  .notif-item .n-title{font-weight:700;margin:0 0 3px;}
+  .notif-item .n-meta{color:var(--ink-soft);font-size:11px;}
+  .notif-empty{padding:24px 14px;text-align:center;color:var(--ink-soft);font-size:13px;}
+  .container{max-width:560px;margin:0 auto;padding:0 14px;}
+  .bottom-nav{position:fixed;bottom:0;left:0;right:0;z-index:50;background:var(--paper-raised);border-top:1px solid var(--line);display:flex;box-shadow:0 -2px 10px rgba(0,0,0,0.06);}
+  .nav-btn{flex:1;background:none;border:none;padding:9px 4px 10px;display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--ink-soft);font-size:11px;font-weight:700;cursor:pointer;}
+  .nav-btn .nb-icon{font-size:19px;position:relative;}
+  .nav-btn.active{color:var(--gold-deep);}
+  .tab-panel{display:none;} .tab-panel.active{display:block;}
+
+  /* SEARCH */
+  .search-wrap{position:relative;margin:14px 0 4px;}
+  .search-input{width:100%;padding:12px 14px;border-radius:999px;border:1.5px solid var(--line);background:var(--paper-raised);font-size:14.5px;}
+  .search-input:focus{outline:2px solid var(--gold);border-color:var(--gold);}
+  .search-results{position:absolute;top:100%;inset-inline:0;background:var(--paper-raised);border:1px solid var(--line);border-radius:14px;box-shadow:0 8px 24px rgba(0,0,0,0.12);z-index:30;max-height:340px;overflow:auto;margin-top:6px;}
+  .sr-item{display:flex;align-items:center;gap:10px;padding:8px 12px;cursor:pointer;border-bottom:1px solid var(--line);width:100%;background:none;border-inline:none;border-top:none;text-align:start;}
+  .sr-item:last-child{border-bottom:none;}
+  .sr-empty{padding:14px;font-size:13px;color:var(--ink-soft);text-align:center;}
+
+  /* PICKER */
+  .picker{padding:14px 0 10px;text-align:center;}
+  .picker h1{font-size:20px;margin:6px 0 4px;font-weight:800;}
+  .picker > p{color:var(--ink-soft);font-size:13px;margin:0 0 16px;}
+  .picker-grid{display:flex;gap:12px;flex-wrap:wrap;}
+  .picker-card{flex:1 1 140px;background:var(--paper-raised);border-radius:var(--radius);padding:18px 10px;box-shadow:var(--shadow);cursor:pointer;border:2px solid transparent;}
+  .picker-card:hover{border-color:var(--gold);}
+  .picker-card .icon{width:56px;height:56px;border-radius:50%;margin:0 auto 10px;background:var(--line);display:flex;align-items:center;justify-content:center;font-size:24px;}
+  .picker-card h3{margin:0;font-size:14.5px;font-weight:700;}
+  .picker-card p{margin:4px 0 0;font-size:12px;color:var(--ink-soft);}
+  .section-h{font-size:13px;font-weight:800;color:var(--ink-soft);margin:20px 0 8px;text-align:start;}
+  .root-list{display:flex;flex-wrap:wrap;gap:8px;}
+  .chip-btn{background:var(--paper-raised);border:1.5px solid var(--line);border-radius:999px;padding:6px 13px;font-size:12.5px;font-weight:700;cursor:pointer;}
+  .chip-btn:hover{border-color:var(--gold);}
+  .info-card{background:var(--paper-raised);border-radius:var(--radius);box-shadow:var(--shadow);padding:14px 16px;margin:12px 0;text-align:start;}
+  .info-card h3{margin:0 0 8px;font-size:14px;font-weight:800;}
+  .event-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);font-size:13px;cursor:pointer;}
+  .event-row:last-child{border-bottom:none;}
+  .event-when{flex:0 0 auto;font-size:11.5px;font-weight:800;padding:3px 10px;border-radius:999px;background:var(--gold-bg);color:var(--gold-deep);}
+  .event-when.memorial{background:var(--deceased-bg);color:var(--deceased);}
+  .stats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;}
+  .stat{background:var(--paper);border-radius:12px;padding:10px;text-align:center;}
+  .stat b{display:block;font-size:20px;font-weight:800;}
+  .stat span{font-size:11.5px;color:var(--ink-soft);}
+
+  /* TREE */
+  .breadcrumb{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 0 4px;font-size:13px;color:var(--ink-soft);flex-wrap:wrap;}
+  .back-btn{background:none;border:none;color:var(--gold-deep);font-weight:700;font-size:13px;cursor:pointer;padding:0;}
+  .toolbar{display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
+  .seg{display:inline-flex;border:1.5px solid var(--line);border-radius:999px;overflow:hidden;}
+  .seg button{background:var(--paper-raised);border:none;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;color:var(--ink-soft);}
+  .seg button.on{background:var(--btn);color:var(--on-btn);}
+  .add-person-btn{background:var(--btn);color:var(--on-btn);border:none;border-radius:999px;padding:7px 14px;font-size:12.5px;font-weight:700;cursor:pointer;}
+  .tree-title{font-size:16px;font-weight:800;margin:6px 0 2px;}
+  .tree-wrap{padding:8px 0 20px;}
+  .person-row{display:flex;flex-direction:column;}
+  .person-card{display:flex;align-items:center;gap:12px;background:var(--paper-raised);border-radius:var(--radius);padding:10px 12px;margin:6px 0;box-shadow:var(--shadow);cursor:pointer;border:1px solid transparent;text-align:start;width:100%;}
+  .person-card:hover{border-color:var(--gold);}
+  .person-card.ref{opacity:.8;border:1px dashed var(--line);box-shadow:none;background:transparent;}
+  .ref-ico{font-size:18px;color:var(--ink-soft);width:56px;text-align:center;}
+  .avatar{width:54px;height:54px;border-radius:50%;flex:0 0 auto;background:var(--line);display:flex;align-items:center;justify-content:center;font-size:21px;font-weight:700;color:var(--ink-soft);border:2.5px solid var(--paper-raised);box-shadow:0 0 0 2px var(--line);overflow:hidden;}
+  .avatar img{width:100%;height:100%;object-fit:cover;}
+  .avatar.deceased{box-shadow:0 0 0 2px var(--deceased);}
+  .avatar.living{box-shadow:0 0 0 2px var(--living);}
+  .avatar.sm{width:38px;height:38px;font-size:15px;}
+  .p-info{flex:1;min-width:0;}
+  .p-name{font-weight:700;font-size:15px;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .p-meta{margin:2px 0 0;font-size:12px;color:var(--ink-soft);display:flex;gap:6px;align-items:center;flex-wrap:wrap;}
+  .rel-mini{font-size:11px;color:var(--gold-deep);font-weight:800;}
+  .status-pill{font-size:10.5px;font-weight:700;padding:2px 9px;border-radius:999px;}
+  .status-pill.living{background:var(--living-bg);color:var(--living);}
+  .status-pill.deceased{background:var(--deceased-bg);color:var(--deceased);}
+  .status-pill.minor{background:var(--info-bg);color:var(--info);}
+  .status-pill.pending{background:var(--danger-bg);color:var(--danger);}
+  .chev{background:none;border:none;font-size:17px;color:var(--ink-soft);cursor:pointer;padding:4px 8px;flex:0 0 auto;}
+  .admin-badge{display:inline-flex;font-size:10px;font-weight:700;background:var(--gold);color:var(--on-btn);padding:1px 7px;border-radius:999px;}
+  .union-block{margin-inline-start:22px;}
+  .spouse-line{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;background:var(--gold-bg);border:1px solid var(--line);border-radius:999px;padding:4px 12px;margin:2px 0 4px;cursor:pointer;}
+  .children-indent{margin-inline-start:6px;border-inline-start:2px dashed var(--line);padding-inline-start:14px;}
+  .notice{margin:14px 0 0;background:var(--paper-raised);border:1px solid var(--line);border-radius:14px;padding:12px 14px;font-size:12.5px;color:var(--ink-soft);line-height:1.7;text-align:start;}
+  .notice b{color:var(--ink);}
+
+  .person-card.root{border-color:var(--gold);background:var(--gold-bg);}
+  .av-btn{background:none;border:none;padding:0;cursor:pointer;border-radius:50%;flex:0 0 auto;display:flex;}
+  .name-btn{flex:1;min-width:0;background:none;border:none;padding:4px 0;cursor:pointer;text-align:start;display:flex;flex-direction:column;gap:2px;font:inherit;color:inherit;}
+  .name-btn .p-name{font-weight:700;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;}
+  .name-btn:hover .p-name,.name-btn:hover .cn-name{color:var(--gold-deep);text-decoration:underline;}
+  .name-btn.c{align-items:center;text-align:center;flex:none;padding:0;}
+  .chev{border:1.5px solid var(--line);border-radius:999px;padding:5px 11px;font-size:13px;font-weight:800;background:var(--paper);color:var(--ink);white-space:nowrap;}
+  .chev.on{background:var(--btn);color:var(--on-btn);border-color:var(--btn);}
+  .chev.sm{padding:1px 9px;font-size:11px;margin-top:2px;}
+  .spouse-line{font-family:inherit;color:inherit;}
+  .cn-sp{background:none;border:none;font-family:inherit;padding:0;}
+  .tree-hint{font-size:11.5px;color:var(--ink-soft);margin:0 0 4px;line-height:1.6;}
+  .more-roots{margin:16px 0 4px;text-align:start;font-size:13px;}
+  .more-roots summary{cursor:pointer;font-weight:800;color:var(--ink-soft);margin-bottom:8px;}
+  .person-card{cursor:default;}
+
+  /* CHART */
+  .chart-scroll{overflow:auto;padding:10px 4px 24px;direction:ltr;}
+  .chart,.chart ul{display:flex;justify-content:center;margin:0;padding:18px 0 0;position:relative;}
+  .chart{padding-top:0;width:max-content;min-width:100%;}
+  .chart li{list-style:none;position:relative;padding:18px 5px 0;text-align:center;display:flex;flex-direction:column;align-items:center;}
+  .chart > li{padding-top:0;}
+  .chart li::before,.chart li::after{content:'';position:absolute;top:0;right:50%;border-top:2px solid var(--line);width:50%;height:18px;}
+  .chart li::after{right:auto;left:50%;border-left:2px solid var(--line);}
+  .chart li:only-child::before,.chart li:only-child::after{display:none;}
+  .chart ul > li:only-child{padding-top:0;}
+  .chart li:first-child::before,.chart li:last-child::after{border:0 none;}
+  .chart li:last-child::before{border-right:2px solid var(--line);border-radius:0 6px 0 0;}
+  .chart li:first-child::after{border-radius:6px 0 0 0;}
+  .chart ul::before{content:'';position:absolute;top:0;left:50%;border-left:2px solid var(--line);width:0;height:18px;}
+  .cnode{display:inline-flex;flex-direction:column;align-items:center;gap:3px;background:var(--paper-raised);border-radius:14px;padding:8px 10px;box-shadow:var(--shadow);min-width:96px;max-width:150px;cursor:pointer;border:1px solid transparent;font-family:inherit;}
+  .cnode:hover{border-color:var(--gold);}
+  .cnode.ref{opacity:.75;border:1px dashed var(--line);box-shadow:none;font-size:12px;}
+  .cn-name{font-size:12px;font-weight:700;line-height:1.3;}
+  .cn-years{font-size:10.5px;color:var(--ink-soft);}
+  .cn-sp{font-size:10.5px;color:var(--gold-deep);font-weight:700;cursor:pointer;}
+  .cn-rel{font-size:10px;color:var(--info);font-weight:800;}
+
+  /* OVERLAY / SHEET */
+  .overlay{position:fixed;inset:0;background:rgba(20,26,33,0.55);z-index:100;display:none;align-items:flex-end;}
+  .overlay.open{display:flex;}
+  .sheet{background:var(--paper);width:100%;max-height:92vh;overflow-y:auto;border-radius:22px 22px 0 0;padding-bottom:26px;animation:slideup .18s ease-out;max-width:560px;margin:0 auto;position:relative;}
+  @keyframes slideup{from{transform:translateY(24px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+  .sheet-handle{width:38px;height:4px;background:var(--line);border-radius:99px;margin:10px auto;}
+  .close-btn{position:absolute;top:12px;inset-inline-end:14px;background:var(--paper-raised);border:none;width:32px;height:32px;border-radius:50%;font-size:16px;cursor:pointer;color:var(--ink-soft);z-index:2;}
+  .sheet-header{display:flex;flex-direction:column;align-items:center;padding:6px 20px 16px;border-bottom:1px solid var(--line);}
+  .sheet-avatar{width:108px;height:108px;border-radius:50%;background:var(--line);margin-bottom:10px;display:flex;align-items:center;justify-content:center;font-size:40px;font-weight:700;color:var(--ink-soft);overflow:hidden;}
+  .sheet-avatar img{width:100%;height:100%;object-fit:cover;}
+  .sheet-name{font-size:20px;font-weight:800;margin:0;text-align:center;}
+  .sheet-name-alt{font-size:13px;color:var(--ink-soft);margin:2px 0 8px;}
+  .pill-row{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;}
+  .rel-line{margin-top:10px;font-size:13px;background:var(--gold-bg);border-radius:999px;padding:5px 14px;}
+  .contact-row{display:flex;gap:10px;padding:16px 20px 4px;}
+  .contact-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;background:var(--paper-raised);border:1px solid var(--line);border-radius:14px;padding:12px 6px;text-decoration:none;color:var(--ink);font-size:12px;font-weight:700;}
+  .contact-btn.off{opacity:.35;pointer-events:none;}
+  .contact-btn .cb-icon{font-size:20px;}
+  .lock-note{margin:14px 20px 0;background:var(--paper-raised);border:1px dashed var(--line);border-radius:12px;padding:10px 12px;font-size:12.5px;color:var(--ink-soft);line-height:1.6;}
+  .detail-section{padding:12px 20px;}
+  .detail-row{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid var(--line);font-size:14px;align-items:baseline;}
+  .detail-row:last-child{border-bottom:none;}
+  .detail-label{color:var(--ink-soft);flex:0 0 auto;}
+  .detail-value{font-weight:700;text-align:end;}
+  .linkish{background:none;border:none;padding:0;color:var(--gold-deep);text-decoration:underline;cursor:pointer;font-weight:700;font-size:inherit;}
+  .section-title{font-size:12px;font-weight:800;color:var(--gold-deep);margin:0 0 6px;}
+  .social-row{display:flex;flex-wrap:wrap;gap:8px;padding:2px 20px 10px;}
+  .social-chip{display:flex;align-items:center;gap:6px;background:var(--paper-raised);border:1px solid var(--line);border-radius:999px;padding:7px 13px;font-size:12px;font-weight:700;color:var(--ink);text-decoration:none;}
+  .children-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;}
+  .child-chip{background:var(--paper-raised);border:1px solid var(--line);border-radius:999px;padding:5px 12px;font-size:12px;font-weight:700;cursor:pointer;}
+  .action-grid{display:flex;flex-wrap:wrap;gap:8px;padding:8px 20px 0;}
+  .sheet-btn{flex:1 1 45%;display:flex;align-items:center;gap:6px;justify-content:center;border-radius:14px;padding:11px;font-weight:700;font-size:13px;cursor:pointer;border:none;}
+  .sheet-btn.edit{background:var(--btn);color:var(--on-btn);}
+  .sheet-btn.addchild{background:var(--paper-raised);border:1.5px solid var(--gold);color:var(--gold-deep);}
+  .sheet-btn.ghost{background:var(--paper-raised);border:1.5px solid var(--line);color:var(--ink);}
+  .sheet-btn.danger{background:var(--danger-bg);color:var(--danger);}
+  details.hist{margin:14px 20px 0;font-size:12px;background:var(--paper-raised);border-radius:12px;padding:8px 12px;}
+  details.hist summary{cursor:pointer;font-weight:700;color:var(--ink-soft);}
+  .ov-pad{padding:4px 20px 10px;}
+  .form-title{font-size:18px;font-weight:800;margin:4px 0 14px;padding-inline-end:36px;}
+  .form-row-2{display:flex;gap:10px;} .form-row-2 .field{flex:1;min-width:0;}
+  .date-row{display:flex;gap:6px;align-items:center;flex-wrap:wrap;}
+  .field .date-row input{width:62px;flex:0 0 auto;padding:11px 6px;text-align:center;}
+  .field .date-row input.y{width:82px;}
+  .field .date-row select{width:auto;padding:11px 8px;}
+  .chk{display:inline-flex !important;gap:6px;align-items:center;font-size:12.5px;font-weight:700;color:var(--ink-soft);margin:0 !important;cursor:pointer;}
+  .chk input{width:auto !important;}
+  .photo-upload-row{display:flex;align-items:center;gap:12px;}
+  .photo-preview{width:56px;height:56px;border-radius:50%;background:var(--line);overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:22px;flex:0 0 auto;}
+  .photo-preview img{width:100%;height:100%;object-fit:cover;}
+  .fieldset{border:1px solid var(--line);border-radius:14px;padding:12px;margin:10px 0;background:var(--paper-raised);}
+  .fieldset > p{margin:0 0 8px;font-size:12.5px;font-weight:800;color:var(--gold-deep);}
+  .mini-btn{background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:5px 10px;font-size:12px;font-weight:700;cursor:pointer;}
+  .full-btn{width:100%;padding:13px;border-radius:12px;border:none;background:var(--btn);color:var(--on-btn);font-weight:800;font-size:14px;cursor:pointer;margin-top:8px;}
+  .full-btn.ghost{background:var(--paper-raised);color:var(--ink);border:1.5px solid var(--line);}
+  .full-btn.danger{background:var(--paper-raised);color:var(--danger);border:1.5px solid var(--danger-bg);}
+  .row2{display:flex;gap:8px;} .row2 .full-btn{margin-top:0;}
+  textarea.mono{font-family:ui-monospace,Menlo,monospace;font-size:11.5px;direction:ltr;min-height:240px;}
+
+  /* ACCOUNT */
+  .acc-card{background:var(--paper-raised);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px;margin:14px 0;}
+  .acc-card.alert{border:1.5px solid var(--gold);}
+  .acc-profile{display:flex;align-items:center;gap:12px;}
+  .acc-profile h3{margin:0;font-size:15.5px;}
+  .acc-profile p{margin:2px 0 0;font-size:12px;color:var(--ink-soft);}
+  .role-tag{display:inline-block;margin-top:6px;font-size:10.5px;font-weight:700;background:var(--gold);color:var(--on-btn);padding:3px 10px;border-radius:999px;}
+  .member-row{padding:10px 0;border-bottom:1px solid var(--line);}
+  .member-row:last-of-type{border-bottom:none;}
+  .row-top{display:flex;align-items:center;gap:10px;}
+  .member-info{flex:1;min-width:0;}
+  .member-info b{font-size:13.5px;display:block;}
+  .member-info span{font-size:11.5px;color:var(--ink-soft);}
+  .toggle-switch{width:38px;height:22px;border-radius:999px;background:var(--line);position:relative;cursor:pointer;flex:0 0 auto;border:none;}
+  .toggle-switch.on{background:var(--living);}
+  .toggle-switch::after{content:'';position:absolute;top:2px;inset-inline-start:2px;width:18px;height:18px;border-radius:50%;background:#fff;transition:.15s;}
+  .toggle-switch.on::after{inset-inline-start:18px;}
+  .gear-btn{background:var(--paper);border:1px solid var(--line);width:32px;height:32px;border-radius:50%;font-size:13px;cursor:pointer;flex:0 0 auto;}
+  .perm-panel{background:var(--paper);border-radius:12px;padding:12px;margin-top:8px;border:1px dashed var(--line);}
+  .perm-row{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap;}
+  .perm-row > label{font-size:12px;color:var(--ink-soft);font-weight:700;flex:0 0 auto;}
+  .perm-row select{flex:1;min-width:150px;padding:7px 8px;border-radius:8px;border:1px solid var(--line);font-size:12px;background:var(--paper-raised);}
+  .branch-chip{display:inline-flex;gap:6px;align-items:center;background:var(--paper-raised);border:1px solid var(--line);border-radius:999px;padding:3px 10px;font-size:11.5px;margin:2px;}
+  .branch-chip button{background:none;border:none;color:var(--danger);cursor:pointer;font-size:12px;padding:0;}
+  .req-item{border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin:8px 0;background:var(--paper);font-size:13px;}
+  .diff{width:100%;border-collapse:collapse;font-size:12px;margin:8px 0;}
+  .diff td{padding:5px 6px;border-bottom:1px solid var(--line);vertical-align:top;}
+  .diff .old{color:var(--danger);text-decoration:line-through;}
+  .diff .new{color:var(--living);font-weight:700;}
+  .audit-row{font-size:12px;padding:7px 0;border-bottom:1px solid var(--line);line-height:1.6;}
+  .audit-row:last-child{border-bottom:none;}
+
+  /* NEWS */
+  .news-card{background:var(--paper-raised);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px;margin:12px 0;}
+  .news-tag{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:800;padding:3px 10px;border-radius:999px;margin-bottom:8px;}
+  .news-tag.birth{background:var(--living-bg);color:var(--living);}
+  .news-tag.death{background:var(--deceased-bg);color:var(--deceased);}
+  .news-tag.marriage{background:#3A2A12;color:#F5B544;}
+  .news-tag.announcement{background:#2A2145;color:#C4B5FD;}
+  .news-card h3{margin:0 0 6px;font-size:15.5px;}
+  .news-card p{margin:0;font-size:13.5px;color:var(--ink-soft);line-height:1.6;white-space:pre-wrap;}
+  .news-meta{margin-top:10px;font-size:11.5px;color:var(--ink-soft);display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;align-items:center;}
+  .fab-add{position:fixed;bottom:80px;inset-inline-end:16px;width:52px;height:52px;border-radius:50%;background:var(--btn);color:var(--on-btn);border:none;font-size:24px;box-shadow:0 4px 14px rgba(0,0,0,0.25);cursor:pointer;z-index:45;}
+
+  /* MODALS */
+  .modal-mini{position:fixed;inset:0;z-index:120;background:rgba(20,26,33,0.55);display:none;align-items:center;justify-content:center;padding:20px;}
+  .modal-mini.open{display:flex;}
+  .modal-mini-card{background:var(--paper);border-radius:18px;padding:20px;max-width:380px;width:100%;box-shadow:0 10px 30px rgba(0,0,0,0.2);}
+  .modal-mini-card h3{margin:0 0 12px;font-size:16px;}
+  .crop-viewport{width:240px;height:240px;margin:14px auto 0;border-radius:50%;overflow:hidden;position:relative;background:#111;touch-action:none;cursor:grab;border:3px solid var(--paper-raised);box-shadow:0 0 0 2px var(--line);}
+  .crop-viewport img{position:absolute;top:0;left:0;transform-origin:0 0;user-select:none;-webkit-user-drag:none;pointer-events:none;max-width:none;}
+  .crop-hint{font-size:11.5px;color:var(--ink-soft);margin:10px 0 0;}
+  .crop-zoom{width:100%;margin-top:8px;}
+  .toast{position:fixed;bottom:88px;left:50%;transform:translateX(-50%);background:var(--btn);color:var(--on-btn);padding:11px 18px;border-radius:16px;font-size:13px;font-weight:700;z-index:200;box-shadow:0 6px 18px rgba(0,0,0,0.25);display:none;max-width:90vw;text-align:center;}
+
+  @media (min-width:640px){
+    .container{max-width:640px;}
+    .bottom-nav{max-width:640px;margin:0 auto;border-radius:20px 20px 0 0;}
+    .sheet{max-width:540px;border-radius:22px;margin:24px auto;max-height:88vh;}
+    .overlay{align-items:center;padding:20px;}
+    .stats-grid{grid-template-columns:repeat(4,1fr);}
+  }
+  @media (min-width:960px){
+    body{background:var(--paper);}
+    .container{max-width:820px;padding:0 20px;}
+    .bottom-nav{max-width:820px;}
+    .fab-add{inset-inline-end:calc(50% - 410px + 16px);}
+  }
+
+  /* ----- dark theme refinements (design option 2) ----- */
+  .gi{display:block;width:64%;height:64%;background:var(--gold);-webkit-mask:var(--gi) center/contain no-repeat;mask:var(--gi) center/contain no-repeat;}
+  .sheet-avatar .gi{width:60%;height:60%;}
+  .gi-m{--gi:url(data:image/png;base64,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);}
+  .gi-f{--gi:url(data:image/png;base64,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);}
+  .toast{background:var(--raised-2);color:var(--ink);border:1px solid var(--line);}
+  .avatar{background:var(--raised-2);color:var(--gold);border-color:var(--paper);}
+  .sheet-avatar,.photo-preview{background:var(--raised-2);color:var(--gold);}
+  .picker-card{border:1px solid var(--line);box-shadow:none;}
+  .picker-card .icon{background:var(--raised-2);color:var(--gold);}
+  .picker-card .icon svg,.nav-btn svg,.login-brand .mark svg{display:block;}
+  .tree-wrap .person-card{background:transparent;box-shadow:none;border:none;border-bottom:1px solid var(--line);border-radius:0;margin:0;padding:8px 4px;}
+  .tree-wrap .person-card:hover{border-color:var(--line);}
+  .tree-wrap .person-card.root{background:var(--paper-raised);border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:6px;}
+  .tree-wrap .person-card.ref{border:none;border-bottom:1px dashed var(--line);}
+  .chev{background:var(--raised-2);border-color:var(--raised-2);}
+  .spouse-line{background:transparent;border:none;padding:6px 4px;color:var(--ink-soft);}
+  .spouse-line b{color:var(--ink);}
+  .children-indent{border-inline-start:2px solid #3A4A6B;}
+  .cnode{border:1px solid var(--line);box-shadow:none;}
+  .info-card,.acc-card,.news-card{box-shadow:none;border:1px solid var(--line);}
+  .stat{background:var(--paper);border:1px solid var(--line);}
+  .toggle-switch{background:#3A4A6B;}
+  .toggle-switch.on{background:#2E9E62;}
+  .bottom-nav{box-shadow:none;}
+  .nav-btn .nb-icon{display:flex;align-items:center;justify-content:center;height:24px;}
+  .sheet,.modal-mini-card{border:1px solid var(--line);}
+  .overlay,.modal-mini{background:rgba(2,6,14,0.7);}
+  .search-results,.notif-panel{box-shadow:0 8px 24px rgba(0,0,0,0.5);}
+  input::placeholder,textarea::placeholder{color:#8A96AD;}
+</style>
+</head>
+<body>
+
+<div class="login-screen" id="loginScreen">
+  <div class="login-lang"><button data-act="lang" id="loginLangToggle"></button></div>
+  <div class="login-brand"><div class="mark"><svg aria-hidden="true" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22v-7"></path><path d="M12 15c-4 0-7-2.5-7-6a5 5 0 015-5 4.5 4.5 0 018 1 4.5 4.5 0 01.5 9c-1.5 1-4 1-6.5 1z"></path></svg></div><h1 id="loginTitle"></h1><p id="loginSub"></p></div>
+  <div class="login-error" id="loginError"></div>
+  <div class="field"><label id="lblUsername" for="loginUsername"></label><input id="loginUsername" type="email" inputmode="email" autocomplete="email" autocapitalize="off" dir="ltr"></div>
+  <div class="field"><label id="lblPassword" for="loginPassword"></label><input id="loginPassword" type="password" autocomplete="current-password" dir="ltr"></div>
+  <div class="field hidden" id="inviteWrap"><label id="lblInvite" for="loginInvite"></label><input id="loginInvite" autocomplete="off" autocapitalize="off" spellcheck="false" dir="ltr"></div>
+  <button class="login-btn" id="loginSubmit" data-act="login"></button>
+  <button class="full-btn ghost" id="loginModeBtn" data-act="loginMode"></button>
+  <p class="proto-note" id="protoNote"></p>
+</div>
+
+<div id="appShell">
+  <header class="app-bar">
+    <div class="brand"><span class="dot"></span><span id="brandText"></span></div>
+    <div class="bar-actions">
+      <button class="icon-btn hidden" id="undoBtn" data-act="undo"></button>
+      <button class="icon-btn" id="textSizeBtn" data-act="textSize">A</button>
+      <button class="icon-btn" id="notifBtn" data-act="bell" aria-label="notifications">🔔<span class="badge hidden" id="notifBadge"></span></button>
+      <button class="lang-btn" id="langToggle" data-act="lang"></button>
+    </div>
+  </header>
+  <div class="notif-panel" id="notifPanel"></div>
+  <div class="container" id="mainContainer">
+    <div class="tab-panel active" id="tabTree"></div>
+    <div class="tab-panel" id="tabNews"></div>
+    <div class="tab-panel" id="tabAccount"></div>
+  </div>
+  <button class="fab-add hidden" id="fabNews" data-act="newsCompose" aria-label="publish">+</button>
+  <nav class="bottom-nav" id="bottomNav"></nav>
+</div>
+
+<div class="overlay" id="ov"><div class="sheet" id="ovSheet"><div class="sheet-handle"></div><button class="close-btn" data-act="closeOv" aria-label="close">✕</button><div id="ovBody"></div></div></div>
+
+<div class="modal-mini" id="cropModal">
+  <div class="modal-mini-card" style="max-width:320px;text-align:center;">
+    <h3 id="cropTitleH"></h3>
+    <div class="crop-viewport" id="cropViewport"><img id="cropImg" draggable="false" alt=""></div>
+    <p class="crop-hint" id="cropHintText"></p>
+    <input type="range" id="cropZoom" min="1" max="3" step="0.01" value="1" class="crop-zoom">
+    <div class="row2" style="margin-top:12px;">
+      <button class="full-btn ghost" id="cropCancel"></button>
+      <button class="full-btn" id="cropSave"></button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-mini" id="confirmModal">
+  <div class="modal-mini-card">
+    <p id="confirmText" style="margin:0 0 16px;line-height:1.7;font-weight:700;"></p>
+    <div class="row2"><button class="full-btn ghost" id="confirmNo"></button><button class="full-btn" id="confirmYes"></button></div>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status"></div>
+
+<script src="supabase.js"></script>
+<script src="config.js"></script>
+<script>
+'use strict';
+/* =====================================================================
+   Family Tree — prototype v2
+   - Graph data model: persons + unions (marriages). A child points to the
+     union of its parents (like GEDCOM FAMC). One record per person.
+   - Trees are computed from the signed-in member's own position.
+   - Everything persists in this browser (localStorage). In production the
+     same rules must be enforced on the server (see family_tree_schema.sql).
+   ===================================================================== */
+
+/* ---------- utils ---------- */
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let lang = 'ar';
+const L = (ar, en) => lang === 'ar' ? ar : en;
+const safeUrl = u => /^https?:\/\/[^\s<>"']+$/i.test(u || '') ? u : '';
+const safeImg = u => (/^data:image\/(png|jpe?g|webp);base64,[a-z0-9+/=]+$/i.test(u || '') || /^https:\/\/[^\s<>"']+$/i.test(u || '')) ? u : '';
+const uid = () => (crypto.randomUUID ? crypto.randomUUID() : '10000000-1000-4000-8000-100000000000'.replace(/[018]/g, c => (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)));
+function hashPw(s){ let h = 0x811c9dc5; for(const ch of 'ft-demo-salt:' + s){ h ^= ch.codePointAt(0); h = Math.imul(h, 0x01000193) >>> 0; } return 'fnv1a:' + h.toString(16); }
+const RX = { phone:/^\+?[0-9][0-9 \-]{5,19}$/, wa:/^[0-9]{6,15}$/, email:/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/, user:/^[a-z0-9_.]{3,20}$/ };
+const norm = s => String(s || '').toLowerCase().replace(/[ً-ْـ]/g, '').replace(/[أإآٱ]/g, 'ا').replace(/ة/g, 'ه').replace(/ى/g, 'ي').trim();
+const store = { get(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }, set(k, v){ try{ localStorage.setItem(k, v); return true; }catch(e){ return false; } }, del(k){ try{ localStorage.removeItem(k); }catch(e){} } };
+const sess = { get(k){ try{ return sessionStorage.getItem(k); }catch(e){ return null; } }, set(k, v){ try{ sessionStorage.setItem(k, v); }catch(e){} }, del(k){ try{ sessionStorage.removeItem(k); }catch(e){} } };
+
+/* ---------- seed data ---------- */
+function mkP(id, o){
+  return Object.assign({ id, name_ar:'', name_en:'', gender:'m', birth:null, death:null, living:true,
+    place_ar:'', place_en:'', edu_ar:'', edu_en:'', job_ar:'', job_en:'', notes_ar:'', notes_en:'',
+    phone:'', whatsapp:'', email:'', socials:{instagram:'', facebook:'', x:'', tiktok:''}, photo:'',
+    privacy:{contact:'all', photo:'all'}, consent:true, parentUnion:null, order:0 }, o);
+}
+const Y = (y, approx) => ({ y, m:null, d:null, cal:'g', approx:!!approx });
+const D = (y, m, d) => ({ y, m, d, cal:'g', approx:false });
+/* =====================================================================
+   CLOUD LAYER — Supabase. The app keeps an in-memory copy (DB) of what
+   the server lets this member see. Every change is sent as one atomic
+   batch (apply_changes); the server enforces permissions and privacy.
+   ===================================================================== */
+const sb = supabase.createClient(FT_CONFIG.url, FT_CONFIG.key);
+const emptyDB = () => ({ version:2, persons:{}, unions:{}, users:[], news:[], notifications:[], suggestions:[], audit:[], invitations:[] });
+let DB = emptyDB(), SNAP = null, gen = 0, lastLoad = 0, pushQueued = false, chain = Promise.resolve();
+const undoStack = [];
+function beginChange(){}
+function save(){ queuePush(); return true; }
+function commit(){ renderAll(); queuePush(); }
+function queuePush(){ gen++; if(pushQueued) return; pushQueued = true; Promise.resolve().then(() => { pushQueued = false; chain = chain.then(pushChanges).catch(() => {}); }); }
+function afterLoad(){ if(currentUser) renderAll(); else kicked(); }
+function kicked(){ ACT.logout(true); loginErr(L('انتهت صلاحية دخولك أو أُوقف حسابك. راجع مشرف العائلة.', 'Your access has ended or your account was disabled. Contact the family admin.')); }
+function queueReload(){ chain = chain.then(async () => { if(await reload(false)) afterLoad(); }).catch(() => {}); }
+
+const dcol = (d, k) => ({ [k + '_y']:d ? d.y : null, [k + '_m']:d ? (d.m || null) : null, [k + '_d']:d ? (d.d || null) : null, [k + '_cal']:(d && d.cal) || 'g', [k + '_approx']:!!(d && d.approx) });
+function personRow(p){
+  return Object.assign({ id:p.id, name_ar:p.name_ar, name_en:p.name_en || null, gender:p.gender, living:!!p.living, status_unknown:!!p.statusUnknown },
+    dcol(p.birth, 'birth'), dcol(p.living ? null : p.death, 'death'),
+    { place_ar:p.place_ar || null, place_en:p.place_en || null, edu_ar:p.edu_ar || null, edu_en:p.edu_en || null, job_ar:p.job_ar || null, job_en:p.job_en || null,
+      notes_ar:p.notes_ar || null, notes_en:p.notes_en || null, contact_visibility:(p.privacy && p.privacy.contact) || 'all', photo_visibility:(p.privacy && p.privacy.photo) || 'all',
+      consent:!!p.consent, parent_union:p.parentUnion || null, sort_order:p.order || 0 });
+}
+function contactRow(p){ const s = p.socials || {}; return { person_id:p.id, phone:p.phone || '', whatsapp:p.whatsapp || '', email:p.email || '', socials:{ instagram:s.instagram || '', facebook:s.facebook || '', x:s.x || '', tiktok:s.tiktok || '' } }; }
+const contactEmpty = c => !c.phone && !c.whatsapp && !c.email && !Object.values(c.socials).some(Boolean);
+function unionRow(u){ return Object.assign({ id:u.id, status:u.status || 'married' }, dcol(u.start, 'start'), dcol(u.status === 'married' ? null : u.end, 'end')); }
+function userRow(u){ return { user_id:u.id, active:!!u.active, can_publish:!!u.perms.publish, person_id:u.personId || '', add_scope:u.perms.add.scope, edit_scope:u.perms.edit.scope }; }
+const J = JSON.stringify;
+function takeSnap(){
+  return { persons:JSON.parse(J(DB.persons)), unions:JSON.parse(J(DB.unions)), users:JSON.parse(J(DB.users)),
+    sug:new Set(DB.suggestions.map(s => s.id)), news:new Set(DB.news.map(n => n.id)),
+    reads:new Set(DB.notifications.filter(n => n.readBy.includes(currentUser.username)).map(n => n.id)), inv:new Set(DB.invitations.map(i => i.code)) };
+}
+function computeChanges(){
+  const c = {}, add = (k, v) => (c[k] = c[k] || []).push(v), S = SNAP; let self = null;
+  for(const u of Object.values(DB.unions)){
+    const su = S.unions[u.id];
+    if(!su){ add('unions_insert', unionRow(u)); u.partners.forEach(pid => add('partners_insert', { union_id:u.id, person_id:pid })); }
+    else if(J(unionRow(u)) !== J(unionRow(su))) add('unions_update', unionRow(u));
+  }
+  for(const id of Object.keys(S.unions)) if(!DB.unions[id]) add('unions_delete', { id });
+  for(const p of Object.values(DB.persons)){
+    const sp = S.persons[p.id];
+    if(!sp){ add('persons_insert', personRow(p)); if(!contactEmpty(contactRow(p))) add('contacts_upsert', contactRow(p)); continue; }
+    const rowCh = J(personRow(p)) !== J(personRow(sp)), conCh = J(contactRow(p)) !== J(contactRow(sp));
+    if(!rowCh && !conCh) continue;
+    if(canEdit(p.id) === 'full'){ if(rowCh) add('persons_update', personRow(p)); if(conCh) add('contacts_upsert', contactRow(p)); }
+    else if(currentUser.personId === p.id) self = p;
+  }
+  for(const id of Object.keys(S.persons)) if(!DB.persons[id]) add('persons_delete', { id });
+  if(currentUser.super){
+    for(const u of DB.users){
+      const su = S.users.find(x => x.id === u.id); if(!su || u.super) continue;
+      if(J(userRow(u)) !== J(userRow(su))) add('members_update', userRow(u));
+      for(const kind of ['add', 'edit']){
+        const a = u.perms[kind].branches, b = su.perms[kind].branches;
+        a.filter(x => !b.includes(x)).forEach(x => add('branches_insert', { user_id:u.id, kind, root_person:x }));
+        b.filter(x => !a.includes(x)).forEach(x => add('branches_delete', { user_id:u.id, kind, root_person:x }));
+      }
+    }
+    DB.invitations.filter(i => !S.inv.has(i.code)).forEach(i => add('invitations_insert', { code:i.code, email:i.email, person_id:i.personId || '', display_ar:i.name_ar, display_en:i.name_en || '' }));
+    for(const code of S.inv) if(!DB.invitations.some(i => i.code === code)) add('invitations_delete', { code });
+  }
+  DB.suggestions.filter(s => !S.sug.has(s.id)).forEach(s => add('suggestions_insert', { id:s.id, person_id:s.pid, changes:s.changes, comment:s.comment || '' }));
+  DB.news.filter(n => !S.news.has(n.id)).forEach(n => add('news_insert', { id:n.id, type:n.type, person_id:n.pid || '', title_ar:n.title_ar, title_en:n.title_en || '', body_ar:n.body_ar, body_en:n.body_en || '' }));
+  DB.notifications.filter(n => n.readBy.includes(currentUser.username) && !S.reads.has(n.id)).forEach(n => add('reads_insert', { id:n.id }));
+  return { c, self };
+}
+function serverMsg(e){
+  const m = String((e && e.message) || e || '');
+  if(/row-level security|Not allowed|permission denied|Not a member/i.test(m)) return L('رفض الخادم هذا التعديل: ليست لديك صلاحية له.', 'The server refused this change: you do not have permission.');
+  if(/children/i.test(m)) return L('لا يمكن حذف شخص له أبناء مسجلون.', 'Cannot delete a person with recorded children.');
+  if(/descendant/i.test(m)) return L('لا يمكن جعل شخص ابنًا لأحد ذريته.', 'A person cannot become the child of their own descendant.');
+  if(/Invalid marriage|two partners/i.test(m)) return L('زواج غير صالح.', 'Invalid marriage.');
+  if(/fetch|network/i.test(m)) return L('تعذّر الاتصال بالخادم. تحقق من الإنترنت.', 'Could not reach the server. Check your connection.');
+  return L('لم يُحفظ التعديل: ', 'Change was not saved: ') + m;
+}
+async function pushChanges(){
+  if(!currentUser || !SNAP) return;
+  const { c, self } = computeChanges();
+  if(!Object.keys(c).length && !self) return;
+  const pushed = takeSnap();
+  try{
+    if(Object.keys(c).length){ const { error } = await sb.rpc('apply_changes', { c }); if(error) throw error; }
+    if(self){
+      const k = contactRow(self);
+      const { error } = await sb.rpc('update_my_profile', { p_edu_ar:self.edu_ar || '', p_edu_en:self.edu_en || '', p_job_ar:self.job_ar || '', p_job_en:self.job_en || '',
+        p_phone:k.phone, p_whatsapp:k.whatsapp, p_email:k.email, p_socials:k.socials, p_contact_vis:self.privacy.contact || 'all', p_photo_vis:self.privacy.photo || 'all', p_consent:!!self.consent });
+      if(error) throw error;
+    }
+    SNAP = pushed;
+    if(await reload(false)) afterLoad();
+  }catch(e){
+    toast(serverMsg(e), 6000);
+    if(await reload(true)) afterLoad();
+  }
+}
+async function reload(force){
+  const g = gen, { data, error } = await sb.rpc('load_all');
+  if(error || !data){ if(currentUser) toast(serverMsg(error), 5000); return false; }
+  if(!force && g !== gen) return false;
+  applyServer(data); lastLoad = Date.now(); return true;
+}
+const AUDIT_COL = { birth_y:'birth', birth_m:'birth', birth_d:'birth', birth_cal:'birth', birth_approx:'birth', death_y:'death', death_m:'death', death_d:'death', death_cal:'death', death_approx:'death',
+  parent_union:'parentUnion', contact_visibility:'privacy', photo_visibility:'privacy', status_unknown:'living', sort_order:null, updated_at:null, consent_at:null };
+function applyServer(d){
+  const uname = {}; d.members.forEach(m => uname[m.user_id] = m.username);
+  const date = (r, k) => r[k + '_y'] ? { y:r[k + '_y'], m:r[k + '_m'], d:r[k + '_d'], cal:r[k + '_cal'] || 'g', approx:!!r[k + '_approx'] } : null;
+  const persons = {};
+  d.persons.forEach(r => persons[r.id] = mkP(r.id, { name_ar:r.name_ar, name_en:r.name_en || '', gender:r.gender, living:r.living, statusUnknown:r.status_unknown,
+    birth:date(r, 'birth'), death:date(r, 'death'), place_ar:r.place_ar || '', place_en:r.place_en || '', edu_ar:r.edu_ar || '', edu_en:r.edu_en || '', job_ar:r.job_ar || '', job_en:r.job_en || '',
+    notes_ar:r.notes_ar || '', notes_en:r.notes_en || '', privacy:{ contact:r.contact_visibility, photo:r.photo_visibility }, consent:r.consent, parentUnion:r.parent_union, order:r.sort_order }));
+  d.contacts.forEach(k => { const p = persons[k.person_id]; if(!p) return; p.phone = k.phone || ''; p.whatsapp = k.whatsapp || ''; p.email = k.email || ''; p.socials = Object.assign({ instagram:'', facebook:'', x:'', tiktok:'' }, k.socials || {}); });
+  const unions = {};
+  d.unions.forEach(r => unions[r.id] = { id:r.id, partners:[], status:r.status, start:date(r, 'start'), end:date(r, 'end') });
+  d.partners.forEach(([u, p]) => { if(unions[u] && persons[p]) unions[u].partners.push(p); });
+  Object.values(unions).forEach(u => u.partners.sort((a, b) => (persons[a].gender === 'f') - (persons[b].gender === 'f')));
+  const users = d.members.map(m => ({ id:m.user_id, username:m.username, personId:m.person_id, name_ar:m.display_ar, name_en:m.display_en || '', active:m.active, super:m.is_super,
+    perms:{ add:{ scope:m.add_scope, branches:d.branches.filter(b => b.user_id === m.user_id && b.kind === 'add').map(b => b.root_person) },
+            edit:{ scope:m.edit_scope, branches:d.branches.filter(b => b.user_id === m.user_id && b.kind === 'edit').map(b => b.root_person) }, publish:m.can_publish } }));
+  const me = users.find(u => u.id === d.uid) || null;
+  const F = FIELD_LABEL();
+  const audit = d.audit.map(a => {
+    let action = null, detail = '';
+    if(a.t === 'persons'){ action = { INSERT:'add', UPDATE:'edit', DELETE:'delete' }[a.action]; if(a.action === 'UPDATE') detail = [...new Set((a.changed || []).map(k => k in AUDIT_COL ? AUDIT_COL[k] : k).filter(Boolean).map(k => F[k] || k))].join('، '); }
+    else if(a.t === 'person_contacts'){ action = 'edit'; detail = L('بيانات التواصل', 'contact details'); }
+    else if(a.t === 'union_partners') action = { INSERT:'union', DELETE:'unionDelete' }[a.action];
+    else if(a.t === 'unions' && a.action === 'UPDATE') action = 'unionEdit';
+    else if(a.t === 'members') action = a.action === 'INSERT' ? 'user' : 'perm';
+    else if(a.t === 'member_branches') action = 'perm';
+    else if(a.t === 'suggestions') action = a.action === 'APPROVE' ? 'approve' : 'reject';
+    return action && { ts:Date.parse(a.at), user:uname[a.actor] || '—', action, pid:a.pid, pname:a.name || '', detail };
+  }).filter(Boolean);
+  DB = { version:2, persons, unions, users, audit,
+    suggestions:d.suggestions.map(s => ({ id:s.id, pid:s.person_id, by:uname[s.author] || '—', ts:Date.parse(s.created_at), changes:s.changes || {}, comment:s.comment || '', status:s.status })),
+    news:d.news.map(n => ({ id:n.id, type:n.type, pid:n.person_id, title_ar:n.title_ar, title_en:n.title_en || '', body_ar:n.body_ar, body_en:n.body_en || '', ts:Date.parse(n.created_at), by:uname[n.author] || '—' })),
+    notifications:d.notifications.map(n => ({ id:n.id, to:n.recipient ? (me ? me.username : '') : '*', title_ar:n.title_ar, title_en:n.title_en || '', ts:Date.parse(n.created_at), readBy:(me && d.reads.includes(n.id)) ? [me.username] : [] })),
+    invitations:d.invitations.map(i => ({ code:i.code, email:i.email, personId:i.person_id, name_ar:i.display_ar || '', name_en:i.display_en || '', used:!!i.used_at, ts:Date.parse(i.created_at) })) };
+  currentUser = me;
+  SNAP = me ? takeSnap() : null;
+}
+
+/* ---------- graph helpers ---------- */
+const P = id => (id && DB.persons[id]) || null;
+const isF = id => P(id) && P(id).gender === 'f';
+const name = id => { const p = P(id); if(!p) return '?'; return lang === 'ar' ? p.name_ar : (p.name_en || p.name_ar); };
+const txt = (p, f) => lang === 'ar' ? (p[f + '_ar'] || p[f + '_en'] || '') : (p[f + '_en'] || p[f + '_ar'] || '');
+const initialOf = s => (String(s || '').trim()[0]) || '?';
+function parentsOf(id){ const p = P(id); const u = p && DB.unions[p.parentUnion]; return u ? u.partners.filter(x => P(x)) : []; }
+function fatherOf(id){ return parentsOf(id).find(x => !isF(x)) || null; }
+function motherOf(id){ return parentsOf(id).find(x => isF(x)) || null; }
+function unionsOf(id){ return Object.values(DB.unions).filter(u => u.partners.includes(id)).sort((a, b) => ((a.start && a.start.y) || 0) - ((b.start && b.start.y) || 0)); }
+function gYear(d){ if(!d || !d.y) return null; return d.cal === 'h' ? Math.round(d.y * 0.970229 + 621.5643) : d.y; }
+function byOrder(a, b){ return (a.order || 0) - (b.order || 0) || (gYear(a.birth) || 9999) - (gYear(b.birth) || 9999); }
+function childrenOfUnion(uid){ return Object.values(DB.persons).filter(p => p.parentUnion === uid).sort(byOrder); }
+function childrenOf(id){ return unionsOf(id).flatMap(u => childrenOfUnion(u.id)).map(p => p.id); }
+function spousesOf(id){ return unionsOf(id).map(u => u.partners.find(x => x !== id)).filter(x => P(x)); }
+function siblingsOf(id){ const s = new Set(); parentsOf(id).forEach(par => childrenOf(par).forEach(c => { if(c !== id) s.add(c); })); return [...s]; }
+function isDescendant(x, anc){
+  if(!x || x === anc) return false;
+  const seen = new Set(); let q = parentsOf(x);
+  while(q.length){ const n = q.shift(); if(n === anc) return true; if(seen.has(n)) continue; seen.add(n); q = q.concat(parentsOf(n)); }
+  return false;
+}
+function inBranch(pid, root){ if(pid === root || isDescendant(pid, root)) return true; return spousesOf(pid).some(s => s === root || isDescendant(s, root)); }
+function topAncestor(id){ let cur = id; const seen = new Set(); while(true){ seen.add(cur); const ps = parentsOf(cur); if(!ps.length) return cur; const nxt = ps.find(x => !isF(x)) || ps[0]; if(seen.has(nxt)) return cur; cur = nxt; } }
+function allRoots(){
+  const seenU = new Set(), out = [];
+  Object.values(DB.persons).sort((a, b) => (a.gender === 'f') - (b.gender === 'f') || byOrder(a, b)).forEach(p => {
+    if(p.parentUnion || !childrenOf(p.id).length) return;
+    if(spousesOf(p.id).some(s => P(s).parentUnion)) return;
+    const us = unionsOf(p.id).filter(u => childrenOfUnion(u.id).length);
+    if(us.every(u => seenU.has(u.id))) return;
+    us.forEach(u => seenU.add(u.id)); out.push(p.id);
+  });
+  return out.filter(id => !(isF(id) && spousesOf(id).some(s => out.includes(s) && !isF(s))));
+}
+function descendantCount(root){ const seen = new Set(); let q = childrenOf(root); while(q.length){ const n = q.shift(); if(seen.has(n)) continue; seen.add(n); q = q.concat(childrenOf(n)); } return seen.size; }
+function kinDistance(a, b, max){
+  if(a === b) return 0; const seen = new Set([a]); let fr = [a];
+  for(let d = 1; d <= max; d++){ const nx = []; for(const x of fr){ for(const y of [...parentsOf(x), ...childrenOf(x), ...spousesOf(x)]){ if(y === b) return d; if(!seen.has(y)){ seen.add(y); nx.push(y); } } } fr = nx; }
+  return Infinity;
+}
+function ageOf(p){ const b = gYear(p.birth); if(!b) return null; const e = p.living ? new Date().getFullYear() : gYear(p.death); return e ? e - b : null; }
+function isMinor(p){ const a = ageOf(p); return p.living && a !== null && a < 18; }
+
+/* ---------- relationship calculator (Arabic kinship terms) ---------- */
+function ancestorChains(id){ const res = new Map([[id, [id]]]); const q = [id]; while(q.length){ const c = q.shift(); for(const par of parentsOf(c)){ if(!res.has(par)){ res.set(par, res.get(c).concat(par)); q.push(par); } } } return res; }
+function bloodRel(a, b){
+  const A = ancestorChains(a), B = ancestorChains(b); let best = null;
+  for(const [anc, ca] of A){ if(B.has(anc)){ const cb = B.get(anc); const s = ca.length + cb.length; if(!best || s < best.s) best = {ca, cb, s}; } }
+  return best ? describeRel(best.ca, best.cb) : null;
+}
+function describeRel(ca, cb){
+  const a = ca[0], b = cb[0], da = ca.length - 1, db = cb.length - 1, f = isF(b);
+  if(da === 0){
+    if(db === 1) return L(f ? 'ابنتك' : 'ابنك', f ? 'your daughter' : 'your son');
+    if(db === 2) return L(f ? 'حفيدتك' : 'حفيدك', f ? 'your granddaughter' : 'your grandson');
+    return L(`${f ? 'حفيدتك' : 'حفيدك'} (الجيل ${db})`, `your ${'great-'.repeat(db - 2)}grand${f ? 'daughter' : 'son'}`);
+  }
+  if(db === 0){
+    if(da === 1) return L(f ? 'والدتك' : 'والدك', f ? 'your mother' : 'your father');
+    const viaM = isF(ca[1]);
+    if(da === 2) return L(`${f ? 'جدتك' : 'جدك'} ${viaM ? 'لأمك' : 'لأبيك'}`, `your ${viaM ? 'maternal' : 'paternal'} grand${f ? 'mother' : 'father'}`);
+    return L(`${f ? 'جدتك' : 'جدك'} الأعلى (الجيل ${da}، من جهة ${viaM ? 'الأم' : 'الأب'})`, `your ${'great-'.repeat(da - 2)}grand${f ? 'mother' : 'father'} (${viaM ? 'maternal' : 'paternal'})`);
+  }
+  if(da === 1 && db === 1){
+    const sh = parentsOf(a).filter(x => parentsOf(b).includes(x));
+    if(sh.length >= 2) return L(f ? 'أختك الشقيقة' : 'أخوك الشقيق', f ? 'your sister' : 'your brother');
+    const viaM = isF(sh[0]);
+    return L(`${f ? 'أختك' : 'أخوك'} ${viaM ? 'لأم' : 'لأب'}`, `your ${viaM ? 'maternal' : 'paternal'} half-${f ? 'sister' : 'brother'}`);
+  }
+  if(da === 2 && db === 1){ const viaM = isF(ca[1]); return L(viaM ? (f ? 'خالتك' : 'خالك') : (f ? 'عمتك' : 'عمك'), `your ${viaM ? 'maternal' : 'paternal'} ${f ? 'aunt' : 'uncle'}`); }
+  if(da === 1 && db === 2){ const sF = isF(cb[1]); return L(`${f ? 'بنت' : 'ابن'} ${sF ? 'أختك' : 'أخيك'}`, `your ${f ? 'niece' : 'nephew'}`); }
+  if(da === 2 && db === 2){
+    const myM = isF(ca[1]), thF = isF(cb[1]);
+    const u = myM ? (thF ? 'خالتك' : 'خالك') : (thF ? 'عمتك' : 'عمك');
+    return L(`${f ? 'بنت' : 'ابن'} ${u}`, `your cousin (${myM ? 'maternal' : 'paternal'} ${thF ? 'aunt' : 'uncle'}'s ${f ? 'daughter' : 'son'})`);
+  }
+  if(da === 3 && db === 1){ return L(`${f ? 'أخت' : 'أخو'} ${isF(ca[2]) ? 'جدتك' : 'جدك'} ${isF(ca[1]) ? 'لأمك' : 'لأبيك'}`, `your grand-${f ? 'aunt' : 'uncle'}`); }
+  if(da === 1 && db === 3){ return L(`${f ? 'حفيدة' : 'حفيد'} ${isF(cb[2]) ? 'أختك' : 'أخيك'}`, `your grand-${f ? 'niece' : 'nephew'}`); }
+  return L(`${f ? 'قريبة' : 'قريب'} — الجد المشترك: ${name(ca[da])}`, `relative — common ancestor: ${name(ca[da])}`);
+}
+function inLaw(rel, s){
+  const sf = isF(s), sw = sf ? L('زوجتك', 'your wife') : L('زوجك', 'your husband');
+  if(lang !== 'ar') return rel.replace(/^your /, sw + "'s ");
+  let done = false;
+  return rel.split(' ').map(w => {
+    if(!done && /ك$/.test(w)){ done = true; return (w === 'أختك' ? 'أخت' : w.endsWith('تك') ? w.slice(0, -2) + 'ة' : w.endsWith('يك') ? w.slice(0, -1) : w.slice(0, -1)) + ' ' + sw; }
+    if(done && /يك$/.test(w)) return w.slice(0, -1) + (sf ? 'ها' : 'ه');
+    if(done && /ك$/.test(w)) return w.slice(0, -1) + (sf ? 'ها' : 'ه');
+    return w;
+  }).join(' ');
+}
+function relationText(me, b){
+  if(!P(me) || !P(b)) return null;
+  if(me === b) return L('هذا أنت', 'This is you');
+  const f = isF(b);
+  if(spousesOf(me).includes(b)) return L(f ? 'زوجتك' : 'زوجك', f ? 'your wife' : 'your husband');
+  const r = bloodRel(me, b); if(r) return r;
+  for(const s of spousesOf(b)){ const r2 = bloodRel(me, s); if(r2) return L(`${f ? 'زوجة' : 'زوج'} ${r2.replace(/^أخوك/, 'أخيك')}`, `${f ? 'wife' : 'husband'} of ${r2}`); }
+  for(const s of spousesOf(me)){
+    const r3 = bloodRel(s, b); if(r3) return inLaw(r3, s);
+  }
+  for(const s of spousesOf(me)) for(const t of spousesOf(b)){
+    const r4 = bloodRel(s, t); if(r4) return L(`${f ? 'زوجة' : 'زوج'} `, `${f ? 'wife' : 'husband'} of `) + inLaw(r4, s);
+  }
+  return kinDistance(me, b, 6) < Infinity ? L('قريب بالمصاهرة', 'related by marriage') : null;
+}
+
+/* ---------- session & permissions ---------- */
+let currentUser = null;
+function scopeCovers(sc, pid){ if(!sc) return false; if(sc.scope === 'full') return true; if(sc.scope === 'branch') return (sc.branches || []).some(r => P(r) && inBranch(pid, r)); return false; }
+function canEdit(pid, u = currentUser){ if(!u || !P(pid)) return null; if(u.super || scopeCovers(u.perms.edit, pid)) return 'full'; if(u.personId === pid) return 'self'; return null; }
+function canAddUnder(pid, u = currentUser){ return !!u && !!P(pid) && (u.super || scopeCovers(u.perms.add, pid)); }
+function canAddRoot(u = currentUser){ return !!u && (u.super || u.perms.add.scope === 'full'); }
+function hasAnyAdd(u = currentUser){ return !!u && (u.super || u.perms.add.scope === 'full' || (u.perms.add.scope === 'branch' && u.perms.add.branches.length > 0)); }
+function isAdmin(u = currentUser){ return !!u && (u.super || u.perms.edit.scope !== 'none' || u.perms.add.scope !== 'none'); }
+function canPublish(u = currentUser){ return !!u && (u.super || u.perms.publish); }
+function roleLabel(u){ if(u.super) return L('أدمن أعلى', 'Super admin'); if(u.perms.edit.scope === 'full' || u.perms.add.scope === 'full') return L('أدمن عام', 'Full admin'); if(isAdmin(u)) return L('أدمن فرع', 'Branch admin'); return L('عضو', 'Member'); }
+function userByName(n){ return DB.users.find(u => u.username === n) || null; }
+function userDisplay(n){ const u = userByName(n); return u ? L(u.name_ar, u.name_en || u.name_ar) : n; }
+
+/* ---------- privacy ---------- */
+function isPrivileged(p){ return canEdit(p.id) === 'full' || currentUser.personId === p.id; }
+function contactBlockReason(p){
+  if(isPrivileged(p)) return null;
+  if(isMinor(p)) return parentsOf(p.id).includes(currentUser.personId) ? null : L('بيانات القاصرين محمية، ولا تظهر إلا لوالديهم وللمشرفين.', "Minors' details are visible only to their parents and admins.");
+  if(p.living && !p.consent) return L('لم يوافق هذا الشخص بعد على عرض بيانات تواصله.', 'This person has not yet consented to sharing contact details.');
+  const v = (p.privacy && p.privacy.contact) || 'all';
+  if(v === 'all') return null;
+  if(v === 'close'){ const me = currentUser.personId; return (me && kinDistance(me, p.id, 2) <= 2) ? null : L('بيانات التواصل متاحة للأقارب المقربين فقط.', 'Contact details are shared with close relatives only.'); }
+  return L('بيانات التواصل متاحة للمشرفين فقط.', 'Contact details are visible to admins only.');
+}
+function canSeePhoto(p){
+  if(isPrivileged(p)) return true;
+  if(isMinor(p) && !parentsOf(p.id).includes(currentUser.personId)) return false;
+  const v = (p.privacy && p.privacy.photo) || 'all';
+  if(v === 'all') return true;
+  if(v === 'close'){ const me = currentUser.personId; return !!me && kinDistance(me, p.id, 2) <= 2; }
+  return false;
+}
+
+/* ---------- formatting ---------- */
+function fmtDate(d){ if(!d || !d.y) return ''; const s = d.d && d.m ? `${d.d}/${d.m}/${d.y}` : d.m ? `${d.m}/${d.y}` : `${d.y}`; return (d.approx ? L('حوالي ', 'c. ') : '') + s + (d.cal === 'h' ? L(' هـ', ' AH') : ''); }
+function yearsLabel(p){ if(p.statusUnknown && !p.birth) return ''; const b = p.birth ? (p.birth.approx ? '~' : '') + p.birth.y + (p.birth.cal === 'h' ? L('هـ', 'AH') : '') : '?'; if(p.living) return b; const d = p.death && p.death.y ? p.death.y + (p.death.cal === 'h' ? L('هـ', 'AH') : '') : '?'; return b + ' – ' + d; }
+function statusPill(p){ if(p.statusUnknown) return `<span class="status-pill minor">${esc(L('الحالة غير مسجلة', 'Status not recorded'))}</span>`; return `<span class="status-pill ${p.living ? 'living' : 'deceased'}">${esc(p.living ? L('على قيد الحياة', 'Living') : (p.gender === 'f' ? L('متوفاة', 'Deceased') : L('متوفى', 'Deceased')))}</span>`; }
+const initialP = p => initialOf(lang === 'en' && p.name_en ? p.name_en : p.name_ar);
+const genderIcon = p => `<span class="gi ${p.gender === 'f' ? 'gi-f' : 'gi-m'}" aria-hidden="true"></span>`;
+function avatarHtml(p, cls){ const img = canSeePhoto(p) && safeImg(p.photo); return `<div class="avatar ${p.living ? 'living' : 'deceased'} ${cls || ''}">${img ? `<img src="${esc(img)}" alt="">` : genderIcon(p)}</div>`; }
+function unionStatus(u){
+  const st = { married:L('متزوجان', 'married'), divorced:L('منفصلان', 'divorced'), widowed:L('انتهى بالوفاة', 'ended by death') }[u.status] || '';
+  const yrs = [u.start && u.start.y, u.end && u.end.y].filter(Boolean).join(' – ');
+  return yrs ? `${st} (${yrs})` : st;
+}
+function unionName(u){ return u.partners.map(name).join(' + ') + (u.partners.length === 1 ? L(' (والد/ة واحد مسجّل)', ' (single parent recorded)') : ''); }
+function fmtAgo(ts){ const s = Math.round((Date.now() - ts) / 1000); if(s < 60) return L('الآن', 'now'); const m = Math.round(s / 60); if(m < 60) return L(`قبل ${m} دقيقة`, `${m} min ago`); const h = Math.round(m / 60); if(h < 24) return L(`قبل ${h} ساعة`, `${h} h ago`); const d = Math.round(h / 24); if(d < 30) return L(`قبل ${d} يوم`, `${d} days ago`); return new Date(ts).toISOString().slice(0, 10); }
+const linkBtn = pid => `<button class="linkish" data-open="${esc(pid)}">${esc(name(pid))}</button>`;
+
+/* ---------- audit & notifications ---------- */
+function log(){}      /* the server writes the audit log (database triggers) */
+function notify(){}   /* the server creates notifications (database triggers) */
+function myNotifs(){ return DB.notifications.filter(n => n.to === '*' || n.to === currentUser.username); }
+const ACTION_LABEL = () => ({ add:L('أضاف', 'added'), edit:L('عدّل', 'edited'), delete:L('حذف', 'deleted'), reorder:L('أعاد ترتيب', 'reordered'), union:L('سجّل زواجًا لـ', 'added a marriage for'), unionEdit:L('عدّل زواجًا لـ', 'edited a marriage of'), unionDelete:L('حذف زواجًا لـ', 'removed a marriage of'), approve:L('وافق على تصحيح لـ', 'approved a correction for'), reject:L('رفض تصحيحًا لـ', 'rejected a correction for'), news:L('نشر خبرًا', 'published news'), perm:L('غيّر صلاحيات', 'changed permissions of'), user:L('أنشأ حسابًا', 'created account'), link:L('ربط حسابًا بـ', 'linked an account to'), consent:L('وافق على عرض بيانات', 'gave consent for'), pwreset:L('أعاد تعيين كلمة مرور', 'reset password of'), import:L('استورد نسخة احتياطية', 'imported a backup'), undo:L('تراجع عن آخر تعديل', 'undid last change') });
+
+/* ---------- UI primitives ---------- */
+let toastTimer = null;
+function toast(msg, ms){ const el = $('toast'); el.textContent = msg; el.style.display = 'block'; clearTimeout(toastTimer); toastTimer = setTimeout(() => el.style.display = 'none', ms || 2600); }
+function openOv(html, after){ $('ovBody').innerHTML = html; $('ov').classList.add('open'); $('ovSheet').scrollTop = 0; if(after) after(); }
+function closeOv(){ $('ov').classList.remove('open'); }
+let confirmCb = null;
+function confirmBox(text, yes, yesLabel){ $('confirmText').textContent = text; $('confirmYes').textContent = yesLabel || L('تأكيد', 'Confirm'); $('confirmNo').textContent = L('إلغاء', 'Cancel'); confirmCb = yes; $('confirmModal').classList.add('open'); }
+$('confirmNo').onclick = () => { $('confirmModal').classList.remove('open'); confirmCb = null; };
+$('confirmYes').onclick = () => { $('confirmModal').classList.remove('open'); const cb = confirmCb; confirmCb = null; if(cb) cb(); };
+$('ov').addEventListener('click', e => { if(e.target.id === 'ov') closeOv(); });
+function formError(msg){ const e = $('f_err'); if(!e){ toast(msg); return; } e.textContent = msg; e.style.display = 'block'; e.scrollIntoView({block:'center', behavior:'smooth'}); }
+const val = id => { const e = $(id); return e ? String(e.value).trim() : ''; };
+const ACT = {}, CHG = {};
+document.addEventListener('click', e => {
+  if(!e.target.closest('.search-wrap')){ const r = $('searchResults'); if(r) r.classList.add('hidden'); }
+  if(!e.target.closest('#notifPanel') && !e.target.closest('#notifBtn')) $('notifPanel').classList.remove('open');
+  const tg = e.target.closest('[data-toggle]'); if(tg){ e.stopPropagation(); toggleCollapse(tg.dataset.toggle); return; }
+  const ac = e.target.closest('[data-act]'); if(ac && ACT[ac.dataset.act]){ e.preventDefault(); ACT[ac.dataset.act](ac.dataset.arg || '', ac); return; }
+  const op = e.target.closest('[data-open]'); if(op){ e.preventDefault(); openProfile(op.dataset.open); }
+});
+document.addEventListener('change', e => { const c = e.target.closest('[data-chg]'); if(c && CHG[c.dataset.chg]) CHG[c.dataset.chg](c.dataset.arg || '', c.value, c); });
+document.addEventListener('keydown', e => {
+  if(e.key === 'Escape'){ closeOv(); $('notifPanel').classList.remove('open'); }
+  if(e.key === 'Enter' && (e.target.id === 'loginPassword' || e.target.id === 'loginUsername')) ACT.login();
+});
+
+/* ---------- form field builders ---------- */
+function dateField(prefix, label, d){
+  d = d || {};
+  return `<div class="field"><label>${esc(label)}</label><div class="date-row">
+    <input class="y" id="${prefix}_y" inputmode="numeric" maxlength="4" placeholder="${esc(L('السنة', 'Year'))}" value="${esc(d.y || '')}">
+    <input id="${prefix}_m" inputmode="numeric" maxlength="2" placeholder="${esc(L('شهر', 'MM'))}" value="${esc(d.m || '')}">
+    <input id="${prefix}_d" inputmode="numeric" maxlength="2" placeholder="${esc(L('يوم', 'DD'))}" value="${esc(d.d || '')}">
+    <select id="${prefix}_cal"><option value="g" ${d.cal !== 'h' ? 'selected' : ''}>${esc(L('ميلادي', 'Gregorian'))}</option><option value="h" ${d.cal === 'h' ? 'selected' : ''}>${esc(L('هجري', 'Hijri'))}</option></select>
+    <label class="chk"><input type="checkbox" id="${prefix}_ap" ${d.approx ? 'checked' : ''}> ${esc(L('تقريبي', 'approx.'))}</label>
+  </div></div>`;
+}
+function readDate(prefix, label){
+  const yv = val(prefix + '_y'), mv = val(prefix + '_m'), dv = val(prefix + '_d');
+  if(!yv && !mv && !dv) return null;
+  const y = Number(yv), m = mv ? Number(mv) : null, d = dv ? Number(dv) : null, cal = val(prefix + '_cal') || 'g';
+  const [lo, hi] = cal === 'h' ? [500, 1500] : [1100, new Date().getFullYear()];
+  if(!Number.isInteger(y) || y < lo || y > hi) throw `${label}: ${L('السنة غير صحيحة', 'invalid year')}`;
+  if(m !== null && (!Number.isInteger(m) || m < 1 || m > 12)) throw `${label}: ${L('الشهر غير صحيح', 'invalid month')}`;
+  if(d !== null && (m === null || !Number.isInteger(d) || d < 1 || d > (cal === 'h' ? 30 : 31))) throw `${label}: ${L('اليوم غير صحيح (ويتطلب الشهر)', 'invalid day (month required)')}`;
+  if(cal === 'g' && d && m){ const dt = new Date(y, m - 1, d); if(dt.getMonth() !== m - 1) throw `${label}: ${L('تاريخ غير موجود', 'date does not exist')}`; if(dt > new Date()) throw `${label}: ${L('تاريخ في المستقبل', 'date is in the future')}`; }
+  return { y, m, d, cal, approx:!!($(prefix + '_ap') && $(prefix + '_ap').checked) };
+}
+function socialFields(prefix, s){
+  s = s || {};
+  return `<div class="fieldset"><p>${esc(L('روابط التواصل الاجتماعي', 'Social media links'))}</p>
+    ${[['ig', 'instagram', 'Instagram', 'https://instagram.com/...'], ['fb', 'facebook', 'Facebook', 'https://facebook.com/...'], ['x', 'x', 'X', 'https://x.com/...'], ['tt', 'tiktok', 'TikTok', 'https://tiktok.com/@...']]
+      .map(([k, f, l, ph]) => `<div class="field"><label>${l}</label><input id="${prefix}_${k}" dir="ltr" placeholder="${ph}" value="${esc(s[f] || '')}"></div>`).join('')}</div>`;
+}
+function readSocials(prefix){
+  const o = { instagram:val(prefix + '_ig'), facebook:val(prefix + '_fb'), x:val(prefix + '_x'), tiktok:val(prefix + '_tt') };
+  for(const v of Object.values(o)) if(v && !safeUrl(v)) throw L('روابط التواصل يجب أن تبدأ بـ https://', 'Social links must start with https://');
+  return o;
+}
+function photoField(prefix, url){
+  return `<input type="hidden" id="${prefix}_photo" value="">`;   /* photo upload comes with the storage step */
+  const ok = safeImg(url);
+  return `<div class="field"><label>${esc(L('الصورة', 'Photo'))}</label><div class="photo-upload-row">
+    <div class="photo-preview" id="${prefix}_photo_preview">${ok ? `<img src="${esc(ok)}" alt="">` : '📷'}</div>
+    <div><input type="file" accept="image/*" id="${prefix}_photo_file" class="hidden">
+    <button type="button" class="mini-btn" id="${prefix}_photo_btn">${esc(ok ? L('تغيير الصورة', 'Change photo') : L('رفع صورة', 'Upload photo'))}</button>
+    ${ok ? ` <button type="button" class="mini-btn" id="${prefix}_photo_rm">${esc(L('إزالة', 'Remove'))}</button>` : ''}</div></div>
+    <input type="hidden" id="${prefix}_photo" value="${esc(ok)}"></div>`;
+}
+function wirePhoto(prefix){
+  const btn = $(prefix + '_photo_btn'), fi = $(prefix + '_photo_file'), rm = $(prefix + '_photo_rm');
+  if(!btn || !fi) return;
+  btn.onclick = () => fi.click();
+  if(rm) rm.onclick = () => { $(prefix + '_photo').value = ''; $(prefix + '_photo_preview').innerHTML = '📷'; rm.remove(); };
+  fi.onchange = e => { const file = e.target.files[0]; if(!file) return; if(!/^image\//.test(file.type)){ toast(L('الملف ليس صورة', 'Not an image')); return; } const r = new FileReader(); r.onload = () => openCropper(r.result, prefix); r.readAsDataURL(file); fi.value = ''; };
+}
+function personOptions(selected, filter){
+  return Object.values(DB.persons).filter(p => !filter || filter(p)).sort((a, b) => name(a.id).localeCompare(name(b.id), lang))
+    .map(p => `<option value="${esc(p.id)}" ${p.id === selected ? 'selected' : ''}>${esc(name(p.id))} (${esc(yearsLabel(p))})</option>`).join('');
+}
+function unionOptionsFor(personId, preset){
+  const out = [];
+  for(const u of Object.values(DB.unions)){
+    if(!u.partners.some(x => canAddUnder(x))) continue;
+    if(personId && (u.partners.includes(personId) || u.partners.some(x => isDescendant(x, personId)))) continue;
+    out.push({ v:u.id, label:unionName(u) });
+  }
+  out.sort((a, b) => a.label.localeCompare(b.label, lang));
+  if(personId){ const cu = P(personId).parentUnion; if(cu && DB.unions[cu] && !out.some(o => o.v === cu)) out.unshift({ v:cu, label:unionName(DB.unions[cu]) }); }
+  if(preset && preset.startsWith('new:')) out.unshift({ v:preset, label:name(preset.slice(4)) + L(' (الطرف الآخر غير مسجل)', ' (other parent not recorded)') });
+  return out;
+}
+
+/* ---------- crop ---------- */
+const CROP_VIEWPORT = 240;
+let cropState = { w:0, h:0, scale:1, tx:0, ty:0, dragging:false, sx:0, sy:0, prefix:null };
+function openCropper(dataUrl, prefix){
+  const img = $('cropImg');
+  img.onload = () => {
+    cropState.w = img.naturalWidth; cropState.h = img.naturalHeight;
+    const min = Math.max(CROP_VIEWPORT / cropState.w, CROP_VIEWPORT / cropState.h);
+    cropState.scale = min; cropState.tx = (CROP_VIEWPORT - cropState.w * min) / 2; cropState.ty = (CROP_VIEWPORT - cropState.h * min) / 2;
+    const z = $('cropZoom'); z.min = min; z.max = min * 3; z.step = (min * 2) / 100; z.value = min;
+    applyCrop();
+  };
+  img.src = dataUrl; cropState.prefix = prefix;
+  $('cropTitleH').textContent = L('اقتصاص الصورة', 'Crop photo'); $('cropHintText').textContent = L('اسحب للتحريك، واستخدم الشريط للتكبير', 'Drag to move, use the slider to zoom');
+  $('cropCancel').textContent = L('إلغاء', 'Cancel'); $('cropSave').textContent = L('حفظ', 'Save');
+  $('cropModal').classList.add('open');
+}
+function applyCrop(){ const img = $('cropImg'); img.style.width = cropState.w + 'px'; img.style.height = cropState.h + 'px'; img.style.transform = `translate(${cropState.tx}px,${cropState.ty}px) scale(${cropState.scale})`; }
+function clampCrop(){ cropState.tx = Math.min(0, Math.max(CROP_VIEWPORT - cropState.w * cropState.scale, cropState.tx)); cropState.ty = Math.min(0, Math.max(CROP_VIEWPORT - cropState.h * cropState.scale, cropState.ty)); }
+(function initCrop(){
+  const vp = $('cropViewport');
+  vp.addEventListener('pointerdown', e => { cropState.dragging = true; cropState.sx = e.clientX - cropState.tx; cropState.sy = e.clientY - cropState.ty; vp.setPointerCapture(e.pointerId); });
+  vp.addEventListener('pointermove', e => { if(!cropState.dragging) return; cropState.tx = e.clientX - cropState.sx; cropState.ty = e.clientY - cropState.sy; clampCrop(); applyCrop(); });
+  vp.addEventListener('pointerup', () => cropState.dragging = false);
+  vp.addEventListener('pointercancel', () => cropState.dragging = false);
+  $('cropZoom').addEventListener('input', function(){ const ns = parseFloat(this.value), c = CROP_VIEWPORT / 2; const rx = (c - cropState.tx) / cropState.scale, ry = (c - cropState.ty) / cropState.scale; cropState.scale = ns; cropState.tx = c - rx * ns; cropState.ty = c - ry * ns; clampCrop(); applyCrop(); });
+  $('cropCancel').onclick = () => $('cropModal').classList.remove('open');
+  $('cropSave').onclick = () => {
+    const OUT = 320, cv = document.createElement('canvas'); cv.width = OUT; cv.height = OUT;
+    cv.getContext('2d').drawImage($('cropImg'), -cropState.tx / cropState.scale, -cropState.ty / cropState.scale, CROP_VIEWPORT / cropState.scale, CROP_VIEWPORT / cropState.scale, 0, 0, OUT, OUT);
+    const url = cv.toDataURL('image/jpeg', 0.82), pf = cropState.prefix;
+    if($(pf + '_photo')) $(pf + '_photo').value = url;
+    if($(pf + '_photo_preview')) $(pf + '_photo_preview').innerHTML = `<img src="${url}" alt="">`;
+    if($(pf + '_photo_btn')) $(pf + '_photo_btn').textContent = L('تغيير الصورة', 'Change photo');
+    $('cropModal').classList.remove('open');
+  };
+})();
+
+/* =====================================================================
+   LOGIN
+   ===================================================================== */
+const APP_VERSION = 'v6';
+let loginMode = 'in', loginBusy = false;
+function renderLogin(){
+  const up = loginMode === 'up';
+  $('loginLangToggle').textContent = L('English', 'العربية');
+  $('loginTitle').textContent = L('شجرة العائلة', 'Family Tree');
+  $('loginSub').textContent = up ? L('أول مرة؟ أنشئ حسابك برمز الدعوة الذي وصلك', 'First time? Create your account with the invitation code you received') : L('خاصة بأفراد العائلة فقط — الرجاء تسجيل الدخول', 'Private to family members — please sign in');
+  $('lblUsername').textContent = up ? L('الإيميل (نفسه المكتوب في الدعوة)', 'Email (the one in your invitation)') : L('الإيميل', 'Email');
+  $('lblPassword').textContent = up ? L('اختر كلمة مرور (٦ أحرف على الأقل)', 'Choose a password (min 6 characters)') : L('كلمة المرور', 'Password');
+  $('loginPassword').autocomplete = up ? 'new-password' : 'current-password';
+  $('lblInvite').textContent = L('رمز الدعوة', 'Invitation code');
+  $('inviteWrap').classList.toggle('hidden', !up);
+  $('loginSubmit').textContent = loginBusy ? '…' : (up ? L('إنشاء الحساب', 'Create account') : L('تسجيل الدخول', 'Sign in'));
+  $('loginModeBtn').textContent = up ? L('لديّ حساب — تسجيل الدخول', 'I have an account — sign in') : L('لديّ رمز دعوة — إنشاء حساب', 'I have an invitation code — create account');
+  $('protoNote').textContent = L('الدخول بدعوة من مشرف العائلة فقط.', 'Access is by invitation from the family admin only.') + ' · ' + APP_VERSION;
+}
+function loginErr(m){ const e = $('loginError'); e.textContent = m; e.style.display = m ? 'block' : 'none'; }
+function authMsg(e){
+  const m = String((e && e.message) || e || '');
+  if(/invalid login|invalid_credentials/i.test(m)) return L('الإيميل أو كلمة المرور غير صحيحة', 'Incorrect email or password');
+  if(/password/i.test(m) && /6|short|weak|least/i.test(m)) return L('كلمة المرور قصيرة (٦ أحرف على الأقل)', 'Password is too short (min 6 characters)');
+  if(/rate|too many/i.test(m)) return L('محاولات كثيرة. انتظر دقيقة ثم حاول.', 'Too many attempts. Wait a minute and try again.');
+  if(/fetch|network/i.test(m)) return L('تعذّر الاتصال بالخادم. تحقق من الإنترنت.', 'Could not reach the server. Check your connection.');
+  return m;
+}
+ACT.loginMode = () => { loginMode = loginMode === 'in' ? 'up' : 'in'; loginErr(''); renderLogin(); };
+ACT.login = async () => {
+  if(loginBusy) return;
+  const email = val('loginUsername').toLowerCase(), pw = $('loginPassword').value, code = val('loginInvite'), up = loginMode === 'up';
+  if(!RX.email.test(email)) return loginErr(L('اكتب إيميلًا صحيحًا', 'Enter a valid email'));
+  if(pw.length < 6) return loginErr(L('كلمة المرور قصيرة (٦ أحرف على الأقل)', 'Password is too short (min 6 characters)'));
+  if(up && !code) return loginErr(L('اكتب رمز الدعوة', 'Enter your invitation code'));
+  loginBusy = true; loginErr(''); renderLogin();
+  try{
+    let r;
+    if(up){
+      r = await sb.auth.signUp({ email, password:pw, options:{ data:{ invite_code:code } } });
+      if(r.error && /already|registered|exists/i.test(r.error.message)) r = await sb.auth.signInWithPassword({ email, password:pw });
+      if(r.error) throw r.error;
+      if(!r.data.session) throw new Error(L('الحساب أُنشئ لكنه ينتظر تأكيد الإيميل. اطلب من المشرف إيقاف «Confirm email».', 'Account created but awaiting email confirmation. Ask the admin to turn off “Confirm email”.'));
+      const rr = await sb.rpc('redeem_invitation', { p_code:code }); if(rr.error) throw rr.error;
+    } else {
+      r = await sb.auth.signInWithPassword({ email, password:pw }); if(r.error) throw r.error;
+    }
+    if(!(await enterApp())){
+      await sb.auth.signOut();
+      loginErr(up ? L('رمز الدعوة لا يطابق هذا الإيميل، أو أنه استُخدم من قبل.', 'The invitation code does not match this email, or was already used.') : L('هذا الحساب ليس عضوًا في شجرة العائلة، أو أنه موقوف. راجع المشرف.', 'This account is not a member of the family tree, or is disabled. Contact the admin.'));
+    }
+  }catch(e){ loginErr(authMsg(e)); }
+  loginBusy = false; renderLogin();
+};
+async function enterApp(){
+  if(!(await reload(true)) || !currentUser) return false;
+  treeState.rootId = null; activeTab = 'tabTree'; undoStack.length = 0;
+  $('loginScreen').style.display = 'none'; $('appShell').style.display = 'block'; $('loginPassword').value = ''; $('loginInvite').value = '';
+  renderAll(); return true;
+}
+ACT.logout = force => {
+  const was = !!currentUser || force === true; currentUser = null; SNAP = null; DB = emptyDB(); closeOv(); loginMode = 'in'; loginErr('');
+  $('appShell').style.display = 'none'; $('loginScreen').style.display = 'flex'; renderLogin();
+  if(was) sb.auth.signOut().catch(() => {});
+};
+ACT.lang = () => { lang = lang === 'ar' ? 'en' : 'ar'; store.set('ft.lang', lang); applyDir(); closeOv(); if(currentUser) renderAll(); else renderLogin(); };
+function applyDir(){ document.documentElement.lang = lang; document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr'; document.title = L('شجرة العائلة', 'Family Tree'); }
+const TEXT_SIZES = [0.9, 1, 1.15, 1.3];
+let textSizeIdx = Number(store.get('ft.textSize') || 1); if(!(textSizeIdx in TEXT_SIZES)) textSizeIdx = 1;
+function applyTextSize(){ $('mainContainer').style.zoom = TEXT_SIZES[textSizeIdx]; $('ovSheet').style.zoom = TEXT_SIZES[textSizeIdx]; $('textSizeBtn').textContent = ['A−', 'A', 'A+', 'A++'][textSizeIdx]; }
+ACT.textSize = () => { textSizeIdx = (textSizeIdx + 1) % TEXT_SIZES.length; store.set('ft.textSize', String(textSizeIdx)); applyTextSize(); };
+
+/* =====================================================================
+   SHELL
+   ===================================================================== */
+let activeTab = 'tabTree';
+function renderAll(){
+  if(!currentUser) return renderLogin();
+  const fresh = userByName(currentUser.username);
+  if(!fresh || !fresh.active){ ACT.logout(); return; }
+  currentUser = fresh;
+  $('brandText').textContent = L('شجرة العائلة', 'Family Tree');
+  $('langToggle').textContent = L('English', 'العربية');
+  $('undoBtn').classList.toggle('hidden', !undoStack.length || !isAdmin());
+  $('undoBtn').textContent = L('↶ تراجع', '↶ Undo');
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.id === activeTab));
+  renderNav(); renderTreeTab(); renderNews(); renderAccount(); renderNotifs(); applyTextSize();
+  $('fabNews').classList.toggle('hidden', !(activeTab === 'tabNews' && canPublish()));
+}
+function pendingForMe(){ return DB.suggestions.filter(s => s.status === 'pending' && P(s.pid) && canEdit(s.pid) === 'full' && s.by !== currentUser.username); }
+function renderNav(){
+  const pend = pendingForMe().length;
+  $('bottomNav').innerHTML = [['tabTree', ICON.tree, L('الشجرة', 'Tree'), 0], ['tabNews', ICON.news, L('الأخبار', 'News'), 0], ['tabAccount', ICON.user, L('حسابي', 'Account'), pend]]
+    .map(([t, i, l, b]) => `<button class="nav-btn ${activeTab === t ? 'active' : ''}" data-act="tab" data-arg="${t}"><span class="nb-icon">${i}${b ? `<span class="badge">${b}</span>` : ''}</span><span>${esc(l)}</span></button>`).join('');
+}
+ACT.tab = t => { activeTab = t; window.scrollTo(0, 0); renderAll(); };
+ACT.closeOv = () => closeOv();
+ACT.undo = () => {
+  if(!undoStack.length) return;
+  confirmBox(L('التراجع عن آخر تعديل قمت به؟', 'Undo the last change?'), () => {
+    DB = JSON.parse(undoStack.pop()); log('undo', null, ''); closeOv(); commit(); toast(L('تم التراجع ✓', 'Undone ✓'));
+  });
+};
+function renderNotifs(){
+  const list = myNotifs(), unread = list.filter(n => !n.readBy.includes(currentUser.username)).length;
+  const b = $('notifBadge'); b.textContent = unread; b.classList.toggle('hidden', !unread);
+  $('notifPanel').innerHTML = `<div class="notif-panel-head"><b>${esc(L('الإشعارات', 'Notifications'))}</b><button data-act="notifReadAll">${esc(L('تعليم الكل كمقروء', 'Mark all read'))}</button></div>` +
+    (list.length ? list.slice(0, 40).map(n => `<div class="notif-item"><p class="n-title">${n.readBy.includes(currentUser.username) ? '' : '🔵 '}${esc(L(n.title_ar, n.title_en || n.title_ar))}</p><span class="n-meta">${esc(fmtAgo(n.ts))}</span></div>`).join('') : `<div class="notif-empty">${esc(L('لا توجد إشعارات', 'No notifications'))}</div>`);
+}
+ACT.bell = () => $('notifPanel').classList.toggle('open');
+ACT.notifReadAll = () => { myNotifs().forEach(n => { if(!n.readBy.includes(currentUser.username)) n.readBy.push(currentUser.username); }); save(); renderNotifs(); $('notifPanel').classList.add('open'); };
+
+/* =====================================================================
+   TREE TAB
+   ===================================================================== */
+const treeState = { rootId:null, mode:'list', expanded:new Set(), all:false, stack:[] };
+/* The family trees shown on the home screen, for every member. Matched by the person's name. */
+const ICON = { tree:'<svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22v-7"></path><path d="M12 15c-4 0-7-2.5-7-6a5 5 0 015-5 4.5 4.5 0 018 1 4.5 4.5 0 01.5 9c-1.5 1-4 1-6.5 1z"></path></svg>', news:'<svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"></rect><path d="M7 9h10M7 13h10M7 17h6"></path></svg>', user:'<svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"></circle><path d="M4 21a8 8 0 0116 0"></path></svg>', sprout:'<svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22V11"></path><path d="M12 11C12 7 9 5 5 5c0 4 2 7 7 6z"></path><path d="M12 14c0-3 2.5-5 7-5 0 4-2.5 6-7 5z"></path></svg>' };
+const FAMILIES = [
+  { name_en:'Mustafa Bakhit Mohammed', name_ar:'مصطفى بخيت محمد', ar:'عائلة مصطفى بخيت', en:'Mustafa Bakhit family', icon:ICON.tree },
+  { name_en:'Abdelrahman Ahmed Barakat', name_ar:'عبدالرحمن أحمد بركات', ar:'عائلة عبدالرحمن بركات', en:'Abdelrahman Barakat family', icon:ICON.tree }
+];
+const familyRoot = f => { const p = Object.values(DB.persons).find(x => x.name_en === f.name_en) || Object.values(DB.persons).find(x => x.name_ar === f.name_ar); return p ? p.id : null; };
+const isOpen = id => id === treeState.rootId || treeState.all || treeState.expanded.has(id);
+function upcomingEvents(days){
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const out = [];
+  for(const p of Object.values(DB.persons)){
+    const add = (d, kind) => {
+      if(!d || !d.m || !d.d || d.cal === 'h') return;
+      let next = new Date(today.getFullYear(), d.m - 1, d.d); if(next < today) next = new Date(today.getFullYear() + 1, d.m - 1, d.d);
+      const diff = Math.round((next - today) / 86400000);
+      if(diff <= days) out.push({ pid:p.id, kind, diff, years:next.getFullYear() - d.y });
+    };
+    if(p.living) add(p.birth, 'birthday'); else add(p.death, 'memorial');
+  }
+  return out.sort((a, b) => a.diff - b.diff);
+}
+function familyStats(){
+  const ps = Object.values(DB.persons);
+  const living = ps.filter(p => p.living).length;
+  const depth = {}; const dep = id => { if(id in depth) return depth[id]; depth[id] = 0; const pr = parentsOf(id); depth[id] = pr.length ? 1 + Math.max(...pr.map(dep)) : 1; return depth[id]; };
+  const gens = ps.length ? Math.max(...ps.map(p => dep(p.id))) : 0;
+  const spans = ps.filter(p => !p.living && gYear(p.birth) && gYear(p.death)).map(p => gYear(p.death) - gYear(p.birth));
+  const avg = spans.length ? Math.round(spans.reduce((a, b) => a + b, 0) / spans.length) : null;
+  const counts = {}; ps.forEach(p => { const f = (p.name_ar || '').split(' ')[0]; if(f) counts[f] = (counts[f] || 0) + 1; });
+  const top = Object.entries(counts).filter(([, c]) => c > 1).sort((a, b) => b[1] - a[1]).slice(0, 3);
+  return { total:ps.length, living, gens, avg, top };
+}
+function renderTreeTab(){
+  const el = $('tabTree');
+  if(treeState.rootId && !P(treeState.rootId)) treeState.rootId = null;
+  let h = `<div class="search-wrap"><input id="searchInput" class="search-input" type="search" autocomplete="off" placeholder="${esc(L('🔎 ابحث عن أي فرد بالاسم (عربي أو إنجليزي)…', '🔎 Search anyone by name…'))}"><div id="searchResults" class="search-results hidden"></div></div>`;
+  if(!treeState.rootId){
+    const me = P(currentUser.personId) ? currentUser.personId : null, cards = [];
+    FAMILIES.forEach(f => { const r = familyRoot(f); if(r) cards.push([r, L(f.ar, f.en), f.icon, descendantCount(r) + L(' فردًا من الذرية', ' descendants')]); });
+    if(me) cards.push([me, L('ذريتي', 'My descendants'), ICON.sprout, name(me)]);
+    h += `<div class="picker"><h1>${esc(L('اختر الشجرة', 'Choose a tree'))}</h1><p></p>`;
+    h += `<div class="picker-grid">${cards.map(([r, t, i, sub]) => `<div class="picker-card" data-act="pickRoot" data-arg="${esc(r)}" role="button" tabindex="0"><div class="icon">${i}</div><h3>${esc(t)}</h3><p>${esc(sub)}</p></div>`).join('')}</div>`;
+    const famIds = FAMILIES.map(familyRoot), others = allRoots().filter(r => !famIds.includes(r));
+    if(others.length) h += `<details class="more-roots"><summary>${esc(L('فروع أخرى مسجلة', 'Other recorded branches'))}</summary><div class="root-list">${others.map(r => `<button class="chip-btn" data-act="pickRoot" data-arg="${esc(r)}">${esc(name(r))} <span class="muted">· ${descendantCount(r)}</span></button>`).join('')}</div></details>`;
+    const ev = upcomingEvents(30);
+    h += `<div class="info-card"><h3>📅 ${esc(L('المناسبات خلال ٣٠ يومًا', 'Upcoming in the next 30 days'))}</h3>${ev.length ? ev.map(e => `<div class="event-row" data-open="${esc(e.pid)}"><span class="event-when ${e.kind === 'memorial' ? 'memorial' : ''}">${esc(e.diff === 0 ? L('اليوم', 'Today') : e.diff === 1 ? L('غدًا', 'Tomorrow') : L(`بعد ${e.diff} يوم`, `in ${e.diff} days`))}</span><span>${e.kind === 'birthday' ? '🎂' : '🕊️'} ${esc(name(e.pid))} — ${esc(e.kind === 'birthday' ? L(`يُكمل ${e.years} عامًا`, `turns ${e.years}`) : L(`الذكرى ${e.years} لوفاته${isF(e.pid) ? 'ا' : ''}`, `${e.years} years since passing`))}</span></div>`).join('') : `<p class="muted small" style="margin:0">${esc(L('لا مناسبات قريبة. تظهر المناسبات فقط لمن سُجّل يوم وشهر ميلاده أو وفاته.', 'Nothing upcoming. Only people with a full day and month recorded appear here.'))}</p>`}</div>`;
+    const st = familyStats();
+    h += `<div class="info-card"><h3>📊 ${esc(L('إحصاءات العائلة', 'Family insights'))}</h3><div class="stats-grid">
+      <div class="stat"><b>${st.total}</b><span>${esc(L('فردًا مسجلًا', 'people'))}</span></div>
+      <div class="stat"><b>${st.living}</b><span>${esc(L('على قيد الحياة', 'living'))}</span></div>
+      <div class="stat"><b>${st.gens}</b><span>${esc(L('أجيال', 'generations'))}</span></div>
+      <div class="stat"><b>${st.avg ?? '—'}</b><span>${esc(L('متوسط العمر للمتوفين', 'avg. lifespan (deceased)'))}</span></div></div>
+      ${st.top.length ? `<p class="small muted" style="margin:10px 0 0">${esc(L('أكثر الأسماء تكرارًا: ', 'Most common first names: '))}${st.top.map(([n, c]) => `<b>${esc(n)}</b> (${c})`).join('، ')}</p>` : ''}</div>`;
+    h += `<div class="notice"><b>${esc(L('ما الجديد:', "What's new:"))}</b> ${esc(L('كل تعديل يُحفظ في قاعدة بيانات العائلة ويراه بقية الأعضاء. الحالة (حي/متوفى) وسنوات الميلاد لم تُستورد بعد، وتظهر «الحالة غير مسجلة» حتى يكملها المشرف.', 'Every change is saved to the family database and seen by other members. Living status and birth years were not imported yet and show “status not recorded” until an admin fills them in.'))}</div></div>`;
+  } else {
+    const r = treeState.rootId, prev = treeState.stack.length ? treeState.stack[treeState.stack.length - 1] : null, sps = spousesOf(r);
+    h += `<div class="breadcrumb"><div class="toolbar">${prev && P(prev) ? `<button class="back-btn" data-act="treeBack">${esc(L('→ رجوع إلى ', '← Back to ') + name(prev))}</button>` : ''}<button class="back-btn" data-act="pickRoot" data-arg="">${esc(prev && P(prev) ? L('⌂ القائمة', '⌂ Home') : L('→ رجوع للاختيار', '← Back'))}</button></div>
+      <div class="toolbar"><div class="seg"><button class="${treeState.mode === 'list' ? 'on' : ''}" data-act="treeMode" data-arg="list">${esc(L('قائمة', 'List'))}</button><button class="${treeState.mode === 'chart' ? 'on' : ''}" data-act="treeMode" data-arg="chart">${esc(L('مخطط', 'Chart'))}</button></div>
+      <button class="chip-btn" data-act="collapseAll">${esc(treeState.all ? L('طيّ الكل', 'Collapse all') : L('توسيع الكل', 'Expand all'))}</button>
+      ${hasAnyAdd() ? `<button class="add-person-btn" data-act="addPerson">+ ${esc(L('إضافة فرد', 'Add person'))}</button>` : ''}</div></div>
+      <p class="tree-title">${esc(L('أسرة ', 'Family of ') + name(r))} <span class="muted small">· ${childrenOf(r).length} ${esc(L('أبناء', 'children'))} · ${descendantCount(r)} ${esc(L('من الذرية', 'descendants'))}</span></p>
+      <p class="tree-hint">${esc(L('اضغط الاسم لفتح أسرته (زوجته وأبناؤه) · السهم ▾ لعرض الأبناء هنا · الصورة للملف الشخصي', 'Tap a name to open their family · the ▾ arrow lists children here · the photo opens the profile'))}</p>
+      <div class="tree-wrap" id="treeRoot"></div><div class="notice">${permNotice()}</div>`;
+  }
+  el.innerHTML = h;
+  if(treeState.rootId){
+    const c = $('treeRoot'), ctx = { visited:new Set(), unions:new Set(), relCache:new Map() };
+    if(treeState.mode === 'list') c.appendChild(renderNode(treeState.rootId, ctx));
+    else { const sc = document.createElement('div'); sc.className = 'chart-scroll'; const ul = document.createElement('ul'); ul.className = 'chart'; ul.appendChild(chartLi(treeState.rootId, ctx)); sc.appendChild(ul); c.appendChild(sc); requestAnimationFrame(() => { sc.scrollLeft = (sc.scrollWidth - sc.clientWidth) / 2; }); }
+  }
+  $('searchInput').addEventListener('input', onSearch);
+  $('searchInput').addEventListener('focus', onSearch);
+}
+function permNotice(){
+  const u = currentUser;
+  if(u.super || u.perms.edit.scope === 'full') return `<b>🔑</b> ${esc(L('يمكنك إضافة وتعديل أي فرد في كل الأشجار، والموافقة على طلبات التصحيح.', 'You can add and edit anyone in all trees and approve correction requests.'))}`;
+  if(isAdmin(u)){ const br = [...new Set([...u.perms.add.branches, ...u.perms.edit.branches])].filter(P).map(name).join('، '); return `<b>🔑</b> ${esc(L('أنت أدمن على فرع: ', 'You administer the branch(es) of: ') + br + L('. تعديلاتك وموافقاتك محصورة فيه، ولغيره يمكنك اقتراح تصحيح.', '. Elsewhere you can suggest corrections.'))}`; }
+  return `<b>👁</b> ${esc(L('يمكنك التصفح وتعديل بياناتك الشخصية، و«اقتراح تصحيح» لأي فرد ليراجعه المشرف.', 'You can browse, edit your own details, and “suggest a correction” for anyone for an admin to review.'))}`;
+}
+function relCached(ctx, id){ const me = currentUser.personId; if(!P(me)) return null; if(!ctx.relCache.has(id)) ctx.relCache.set(id, relationText(me, id)); return ctx.relCache.get(id); }
+function renderNode(id, ctx){
+  const wrap = document.createElement('div'); wrap.className = 'person-row';
+  if(ctx.visited.has(id)){
+    wrap.innerHTML = `<button class="person-card ref" data-act="drill" data-arg="${esc(id)}"><span class="ref-ico">↪</span><div class="p-info"><p class="p-name">${esc(name(id))}</p><div class="p-meta">${esc(L('يظهر في موضع آخر من هذه الشجرة — سجل واحد', 'Shown elsewhere in this tree — same record'))}</div></div></button>`;
+    return wrap;
+  }
+  ctx.visited.add(id);
+  const p = P(id), kids = childrenOf(id).length, rel = relCached(ctx, id), isRoot = id === treeState.rootId, open = isOpen(id);
+  wrap.innerHTML = `<div class="person-card ${isRoot ? 'root' : ''}"><button class="av-btn" data-open="${esc(id)}" aria-label="${esc(L('الملف الشخصي', 'Profile'))}">${avatarHtml(p)}</button><button class="name-btn" ${isRoot ? `data-open="${esc(id)}"` : `data-act="drill" data-arg="${esc(id)}"`}><span class="p-name">${esc(name(id))}</span><span class="p-meta">${statusPill(p)}<span>${esc(yearsLabel(p))}</span>${rel ? `<span class="rel-mini">${esc(rel)}</span>` : ''}${canEdit(id) === 'full' ? '<span class="admin-badge">✎</span>' : ''}</span></button>${kids && !isRoot ? `<button class="chev ${open ? 'on' : ''}" data-toggle="${esc(id)}" aria-expanded="${open}" aria-label="${esc(L('عرض الأبناء', 'Show children'))}">${open ? '▴' : '▾'} ${kids}</button>` : ''}</div>`;
+  if(!open) return wrap;
+  for(const u of unionsOf(id)){
+    const sp = u.partners.find(x => x !== id), ks = childrenOfUnion(u.id);
+    if(!P(sp) && !ks.length) continue;
+    const block = document.createElement('div'); block.className = 'union-block';
+    if(P(sp)) block.insertAdjacentHTML('beforeend', `<button class="spouse-line" data-open="${esc(sp)}">💍 <span class="muted">${esc(isF(sp) ? L('الزوجة:', 'Wife:') : L('الزوج:', 'Husband:'))}</span> <b>${esc(name(sp))}</b></button>`);
+    if(ks.length){
+      if(ctx.unions.has(u.id)) block.insertAdjacentHTML('beforeend', `<div class="muted small">${esc(L('أبناء هذا الزواج معروضون في موضع آخر', 'Children of this marriage are shown elsewhere'))}</div>`);
+      else { ctx.unions.add(u.id); const ind = document.createElement('div'); ind.className = 'children-indent'; ks.forEach(k => ind.appendChild(renderNode(k.id, ctx))); block.appendChild(ind); }
+    }
+    wrap.appendChild(block);
+  }
+  return wrap;
+}
+function chartLi(id, ctx){
+  const li = document.createElement('li');
+  if(ctx.visited.has(id)){ li.innerHTML = `<button class="cnode ref" data-act="drill" data-arg="${esc(id)}" dir="auto">↪ ${esc(name(id))}</button>`; return li; }
+  ctx.visited.add(id);
+  const p = P(id), rel = relCached(ctx, id), isRoot = id === treeState.rootId, open = isOpen(id), n = childrenOf(id).length;
+  li.innerHTML = `<div class="cnode" dir="${lang === 'ar' ? 'rtl' : 'ltr'}"><button class="av-btn" data-open="${esc(id)}" aria-label="${esc(L('الملف الشخصي', 'Profile'))}">${avatarHtml(p, 'sm')}</button><button class="name-btn c" ${isRoot ? `data-open="${esc(id)}"` : `data-act="drill" data-arg="${esc(id)}"`}><span class="cn-name">${esc(name(id))}</span>${rel ? `<span class="cn-rel">${esc(rel)}</span>` : ''}</button>${spousesOf(id).map(s => `<button class="cn-sp" data-open="${esc(s)}">💍 ${esc(name(s))}</button>`).join('')}${n && !isRoot ? `<button class="chev sm ${open ? 'on' : ''}" data-toggle="${esc(id)}">${open ? '▴' : '▾'} ${n}</button>` : ''}</div>`;
+  let kids = [];
+  if(open) for(const u of unionsOf(id)){ if(ctx.unions.has(u.id)) continue; ctx.unions.add(u.id); kids = kids.concat(childrenOfUnion(u.id).map(k => k.id)); }
+  if(kids.length){ if(lang === 'ar') kids.reverse(); const ul = document.createElement('ul'); kids.forEach(k => ul.appendChild(chartLi(k, ctx))); li.appendChild(ul); }
+  return li;
+}
+function toggleCollapse(id){
+  if(treeState.all){ treeState.all = false; treeState.expanded = new Set(Object.keys(DB.persons)); }
+  if(treeState.expanded.has(id)) treeState.expanded.delete(id); else treeState.expanded.add(id);
+  renderTreeTab();
+}
+function showTree(id){ treeState.rootId = id || null; treeState.expanded.clear(); treeState.all = false; activeTab = 'tabTree'; closeOv(); renderAll(); window.scrollTo(0, 0); }
+ACT.pickRoot = id => { treeState.stack = []; showTree(id); };
+ACT.drill = id => { if(!P(id) || id === treeState.rootId) return; if(treeState.rootId) treeState.stack.push(treeState.rootId); showTree(id); };
+ACT.treeBack = () => { let prev = treeState.stack.pop(); while(prev && !P(prev)) prev = treeState.stack.pop(); showTree(prev || null); };
+ACT.inlaws = sp => {
+  const f = fatherOf(sp), m = motherOf(sp), opts = [];
+  if(f) opts.push([topAncestor(f), L('من جهة الأب', "Father's side")]);
+  if(m){ const r = topAncestor(m); if(!opts.some(o => o[0] === r)) opts.push([r, L('من جهة الأم', "Mother's side")]); }
+  openOv(`<div class="ov-pad"><h2 class="form-title">${esc(L('عائلة ', 'Family of ') + name(sp))}</h2><div class="picker-grid">${opts.map(([r, t]) => `<div class="picker-card" data-act="pickRoot" data-arg="${esc(r)}"><div class="icon">🌳</div><h3>${esc(t)}</h3><p>${esc(L('من الجذر: ', 'From: ') + name(r))} · ${descendantCount(r)}</p></div>`).join('')}</div><p class="hint" style="margin-top:12px">${esc(L('تُحسب من والدَي ', 'Computed from the parents of ') + name(sp) + L('، وتتحدث تلقائيًا عند أي تعديل.', '; updates automatically.'))}</p></div>`);
+};
+ACT.treeMode = m => { treeState.mode = m; renderTreeTab(); };
+ACT.collapseAll = () => { treeState.all = !treeState.all; treeState.expanded.clear(); renderTreeTab(); };
+function onSearch(){
+  const q = norm(val('searchInput')), box = $('searchResults');
+  if(!q){ box.classList.add('hidden'); return; }
+  const toks = q.split(/\s+/);
+  const res = Object.values(DB.persons).filter(p => { const hay = norm(p.name_ar + ' ' + p.name_en); return toks.every(t => hay.includes(t)); }).slice(0, 20);
+  const me = P(currentUser.personId) ? currentUser.personId : null;
+  box.innerHTML = res.length ? res.map(p => { const r = me ? relationText(me, p.id) : null; return `<button class="sr-item" data-open="${esc(p.id)}">${avatarHtml(p, 'sm')}<div class="p-info"><p class="p-name">${esc(name(p.id))}</p><div class="p-meta"><span>${esc(yearsLabel(p))}</span>${r ? `<span class="rel-mini">${esc(r)}</span>` : ''}${parentsOf(p.id).length ? `<span>${esc(L('ابن/ة ', 'child of ') + parentsOf(p.id).map(name).join(L(' و', ' & ')))}</span>` : ''}</div></div></button>`; }).join('') : `<div class="sr-empty">${esc(L('لا نتائج', 'No results'))}</div>`;
+  box.classList.remove('hidden');
+}
+
+/* =====================================================================
+   PROFILE SHEET
+   ===================================================================== */
+function openProfile(id){
+  const p = P(id);
+  if(!p){ toast(L('هذا الشخص لم يعد موجودًا في الشجرة', 'This person is no longer in the tree')); return; }
+  const r = $('searchResults'); if(r) r.classList.add('hidden');
+  const me = P(currentUser.personId) ? currentUser.personId : null, cap = canEdit(id);
+  const rel = me ? relationText(me, id) : null, block = contactBlockReason(p);
+  const img = canSeePhoto(p) && safeImg(p.photo);
+  let h = `<div class="sheet-header"><div class="sheet-avatar">${img ? `<img src="${esc(img)}" alt="">` : genderIcon(p)}</div>
+    <h2 class="sheet-name">${esc(name(id))}</h2><div class="sheet-name-alt">${esc(lang === 'ar' ? p.name_en : p.name_ar)}</div>
+    <div class="pill-row">${statusPill(p)}${isMinor(p) ? `<span class="status-pill minor">${esc(L('قاصر — بيانات محمية', 'Minor — protected'))}</span>` : ''}${p.living && !isMinor(p) && !p.consent ? `<span class="status-pill pending">${esc(L('لم يوافق بعد على عرض بياناته', 'Consent pending'))}</span>` : ''}</div>
+    ${rel ? `<div class="rel-line">🧭 ${esc(L('صلته بك: ', 'Relation to you: '))}<b>${esc(rel)}</b></div>` : ''}</div>`;
+  if(!block){
+    const a = (href, cls, ico, lbl, ok) => `<a class="contact-btn ${ok ? '' : 'off'}" ${ok ? `href="${esc(href)}"` : 'aria-disabled="true"'} ${cls === 'wa' && ok ? 'target="_blank" rel="noopener"' : ''}><span class="cb-icon">${ico}</span><span>${esc(lbl)}</span></a>`;
+    h += `<div class="contact-row">${a('tel:' + p.phone, 'call', '📞', L('اتصال', 'Call'), !!p.phone)}${a('https://wa.me/' + p.whatsapp, 'wa', '💬', L('واتساب', 'WhatsApp'), !!p.whatsapp)}${a('mailto:' + p.email, 'mail', '✉️', L('إيميل', 'Email'), !!p.email)}</div>`;
+  } else h += `<div class="lock-note">🔒 ${esc(block)}</div>`;
+  const rows = [];
+  if(p.birth){ const ag = ageOf(p); rows.push([L('الميلاد', 'Born'), esc(fmtDate(p.birth)) + (ag !== null ? ` <span class="muted">(${esc(p.living ? L(`العمر ${ag}`, `age ${ag}`) : L(`عاش ${ag} عامًا`, `lived ${ag} years`))})</span>` : '')]); }
+  const place = txt(p, 'place'); if(place) rows.push([L('مكان الميلاد', 'Birthplace'), esc(place)]);
+  if(!p.living) rows.push([L('الوفاة', 'Passed'), esc(fmtDate(p.death) || L('التاريخ غير معروف', 'date unknown'))]);
+  const ps = parentsOf(id); if(ps.length) rows.push([L('الوالدان', 'Parents'), ps.map(linkBtn).join(L(' و', ' & '))]);
+  unionsOf(id).forEach(u => { const sp = u.partners.find(x => x !== id); rows.push([L('الزواج', 'Marriage'), (P(sp) ? linkBtn(sp) : `<span class="muted">${esc(L('الطرف الآخر غير مسجل', 'other parent not recorded'))}</span>`) + ` <span class="muted small">${esc(unionStatus(u))}</span>` + (u.partners.some(x => canEdit(x) === 'full') ? ` <button class="mini-btn" data-act="editUnion" data-arg="${esc(u.id)}" aria-label="edit">✎</button>` : '')]); });
+  const sib = siblingsOf(id); if(sib.length) rows.push([L('الإخوة', 'Siblings'), sib.map(linkBtn).join('، ')]);
+  [['edu', L('الدراسة', 'Education')], ['job', L('المهنة', 'Occupation')], ['notes', L('ملاحظات', 'Notes')]].forEach(([f, l]) => { const t = txt(p, f); if(t) rows.push([l, esc(t)]); });
+  h += `<div class="detail-section">${rows.map(([l, v]) => `<div class="detail-row"><span class="detail-label">${esc(l)}</span><span class="detail-value">${v}</span></div>`).join('')}</div>`;
+  if(!block && p.socials){
+    const S = { instagram:['📷', 'Instagram'], facebook:['📘', 'Facebook'], x:['✕', 'X'], tiktok:['🎵', 'TikTok'] };
+    const chips = Object.keys(S).filter(k => safeUrl(p.socials[k])).map(k => `<a class="social-chip" href="${esc(p.socials[k])}" target="_blank" rel="noopener"><span>${S[k][0]}</span><span>${S[k][1]}</span></a>`).join('');
+    if(chips) h += `<div class="social-row">${chips}</div>`;
+  }
+  const us = unionsOf(id).filter(u => childrenOfUnion(u.id).length);
+  if(us.length){
+    h += `<div class="detail-section"><p class="section-title">${esc(L('الأبناء', 'Children'))}</p>`;
+    us.forEach(u => { const sp = u.partners.find(x => x !== id); if(us.length > 1 || !P(sp)) h += `<p class="small muted" style="margin:6px 0 4px">${esc(P(sp) ? L('من ', 'with ') + name(sp) : L('الطرف الآخر غير مسجل', 'other parent not recorded'))}</p>`; h += `<div class="children-chips">${childrenOfUnion(u.id).map(c => `<button class="child-chip" data-open="${esc(c.id)}">${esc(name(c.id))}</button>`).join('')}</div>`; });
+    h += `</div>`;
+  }
+  const btn = (act, arg, label, cls) => `<button class="sheet-btn ${cls}" data-act="${act}" data-arg="${esc(arg)}">${label}</button>`;
+  const acts = [];
+  if(cap === 'full') acts.push(btn('editPerson', id, '✎ ' + esc(L('تعديل', 'Edit')), 'edit'));
+  else if(cap === 'self') acts.push(btn('selfEdit', '', '✎ ' + esc(L('تعديل بياناتي', 'Edit my details')), 'edit'));
+  if(canAddUnder(id)) acts.push(btn('addChild', id, '+ ' + esc(L('إضافة ابن/ابنة', 'Add child')), 'addchild'));
+  if(cap === 'full' || canAddUnder(id)) acts.push(btn('addSpouse', id, '💍 ' + esc(L('إضافة زواج', 'Add marriage')), 'ghost'));
+  if(cap !== 'full') acts.push(btn('suggest', id, '📝 ' + esc(L('اقتراح تصحيح', 'Suggest a correction')), 'ghost'));
+  if(cap === 'full' && p.parentUnion && childrenOfUnion(p.parentUnion).length > 1){ acts.push(btn('moveSib', id + '|-1', '↑ ' + esc(L('تقديم في ترتيب الإخوة', 'Move earlier')), 'ghost')); acts.push(btn('moveSib', id + '|1', '↓ ' + esc(L('تأخير في ترتيب الإخوة', 'Move later')), 'ghost')); }
+  acts.push(btn('pickRoot', id, '🌳 ' + esc(L('عرض الشجرة من هنا', 'View tree from here')), 'ghost'));
+  if(cap === 'full') acts.push(btn('deletePerson', id, '🗑 ' + esc(L('حذف', 'Delete')), 'danger'));
+  h += `<div class="action-grid">${acts.join('')}</div>`;
+  if(cap === 'full'){
+    const hist = DB.audit.filter(a => a.pid === id).slice(0, 15);
+    if(hist.length) h += `<details class="hist"><summary>${esc(L('سجل التعديلات', 'Change history'))} (${hist.length})</summary>${hist.map(auditRow).join('')}</details>`;
+  }
+  openOv(h);
+}
+function auditRow(a){ return `<div class="audit-row"><b>${esc(userDisplay(a.user))}</b> ${esc(ACTION_LABEL()[a.action] || a.action)} ${a.pid && P(a.pid) ? linkBtn(a.pid) : esc(a.pname || '')}${a.detail ? ` <span class="muted">— ${esc(a.detail)}</span>` : ''}<br><span class="muted small">${esc(fmtAgo(a.ts))}</span></div>`; }
+
+/* =====================================================================
+   ADD / EDIT PERSON
+   ===================================================================== */
+const FIELD_LABEL = () => ({ name_ar:L('الاسم بالعربية', 'Arabic name'), name_en:L('الاسم بالإنجليزية', 'English name'), gender:L('الجنس', 'Gender'), birth:L('الميلاد', 'Birth'), death:L('الوفاة', 'Death'), living:L('الحالة', 'Status'), parentUnion:L('الوالدان', 'Parents'), place_ar:L('مكان الميلاد', 'Birthplace'), place_en:L('مكان الميلاد (EN)', 'Birthplace (EN)'), edu_ar:L('الدراسة', 'Education'), edu_en:L('الدراسة (EN)', 'Education (EN)'), job_ar:L('المهنة', 'Occupation'), job_en:L('المهنة (EN)', 'Occupation (EN)'), notes_ar:L('ملاحظات', 'Notes'), notes_en:L('ملاحظات (EN)', 'Notes (EN)'), phone:L('الهاتف', 'Phone'), whatsapp:L('واتساب', 'WhatsApp'), email:L('الإيميل', 'Email'), photo:L('الصورة', 'Photo'), socials:L('روابط التواصل', 'Social links'), privacy:L('الخصوصية', 'Privacy'), consent:L('الموافقة', 'Consent'), birth_y:L('سنة الميلاد', 'Birth year'), death_y:L('سنة الوفاة', 'Death year') });
+function personForm(mode, id, preset){
+  const p = id ? P(id) : mkP('', { consent:false });
+  const title = mode === 'add' ? L('إضافة فرد جديد', 'Add a person') : mode === 'edit' ? L('تعديل: ', 'Edit: ') + name(id) : L('تعديل بياناتي', 'Edit my details');
+  let h = `<div class="ov-pad"><h2 class="form-title">${esc(title)}</h2><div class="form-error" id="f_err"></div>`;
+  if(mode !== 'self'){
+    const opts = unionOptionsFor(mode === 'edit' ? id : null, preset);
+    const cur = mode === 'add' ? (preset || (opts[0] && opts[0].v) || '') : (p.parentUnion || '');
+    const canMove = mode === 'add' || hasAnyAdd();
+    const rootOpt = canAddRoot() || (mode === 'edit' && !p.parentUnion);
+    h += `<div class="field"><label>${esc(L('الوالدان', 'Parents'))}</label><select id="pf_parent" ${canMove ? '' : 'disabled'}>${rootOpt ? `<option value="" ${!cur ? 'selected' : ''}>${esc(L('— بلا والدين مسجلين (جذر جديد) —', '— No recorded parents (new root) —'))}</option>` : ''}${opts.map(o => `<option value="${esc(o.v)}" ${o.v === cur ? 'selected' : ''}>${esc(o.label)}</option>`).join('')}</select>${mode === 'edit' ? `<div class="hint">${esc(L('تغيير الوالدين ينقل هذا الشخص وذريته إلى موضع آخر في الشجرة.', 'Changing parents moves this person and their descendants.'))}</div>` : ''}</div>
+    <div class="form-row-2"><div class="field"><label>${esc(L('الاسم بالعربية', 'Name (Arabic)'))} *</label><input id="pf_name_ar" value="${esc(p.name_ar)}"></div><div class="field"><label>${esc(L('الاسم بالإنجليزية', 'Name (English)'))}</label><input id="pf_name_en" dir="ltr" value="${esc(p.name_en)}"></div></div>
+    <div class="form-row-2"><div class="field"><label>${esc(L('الجنس', 'Gender'))}</label><select id="pf_gender"><option value="m" ${p.gender === 'm' ? 'selected' : ''}>${esc(L('ذكر', 'Male'))}</option><option value="f" ${p.gender === 'f' ? 'selected' : ''}>${esc(L('أنثى', 'Female'))}</option></select></div>
+    <div class="field"><label>${esc(L('الحالة', 'Status'))}</label><select id="pf_living" data-chg="toggleDeath"><option value="1" ${p.living ? 'selected' : ''}>${esc(L('على قيد الحياة', 'Living'))}</option><option value="0" ${!p.living ? 'selected' : ''}>${esc(L('متوفى', 'Deceased'))}</option></select></div></div>
+    ${dateField('pf_b', L('تاريخ الميلاد', 'Date of birth'), p.birth)}
+    <div id="pf_dd_wrap" class="${p.living ? 'hidden' : ''}">${dateField('pf_dd', L('تاريخ الوفاة', 'Date of passing'), p.death)}</div>
+    <div class="form-row-2"><div class="field"><label>${esc(L('مكان الميلاد', 'Birthplace (Arabic)'))}</label><input id="pf_place_ar" value="${esc(p.place_ar)}"></div><div class="field"><label>${esc(L('مكان الميلاد (EN)', 'Birthplace (English)'))}</label><input id="pf_place_en" dir="ltr" value="${esc(p.place_en)}"></div></div>`;
+  }
+  const pair = (f, lab) => `<div class="form-row-2"><div class="field"><label>${esc(lab)} (ع)</label><input id="pf_${f}_ar" value="${esc(p[f + '_ar'])}"></div><div class="field"><label>${esc(lab)} (EN)</label><input id="pf_${f}_en" dir="ltr" value="${esc(p[f + '_en'])}"></div></div>`;
+  h += pair('edu', L('الدراسة', 'Education')) + pair('job', L('المهنة', 'Occupation'));
+  h += `<div class="fieldset"><p>${esc(L('بيانات التواصل', 'Contact'))}</p>
+    <div class="field"><label>${esc(L('الهاتف', 'Phone'))}</label><input id="pf_phone" dir="ltr" inputmode="tel" placeholder="+1 416 555 0101" value="${esc(p.phone)}"></div>
+    <div class="field"><label>${esc(L('واتساب (أرقام فقط مع رمز الدولة)', 'WhatsApp (digits with country code)'))}</label><input id="pf_wa" dir="ltr" inputmode="numeric" placeholder="14165550101" value="${esc(p.whatsapp)}"></div>
+    <div class="field"><label>${esc(L('الإيميل', 'Email'))}</label><input id="pf_email" dir="ltr" type="email" value="${esc(p.email)}"></div></div>`;
+  h += photoField('pf', p.photo) + socialFields('pf', p.socials);
+  if(mode !== 'self') h += `<div class="field"><label>${esc(L('ملاحظات (عربي)', 'Notes (Arabic)'))}</label><textarea id="pf_notes_ar" rows="3">${esc(p.notes_ar)}</textarea></div><div class="field"><label>${esc(L('ملاحظات (إنجليزي)', 'Notes (English)'))}</label><textarea id="pf_notes_en" dir="ltr" rows="3">${esc(p.notes_en)}</textarea></div>`;
+  const pv = p.privacy || {};
+  h += `<div class="fieldset"><p>🔒 ${esc(L('الخصوصية', 'Privacy'))}</p>
+    <div class="field"><label>${esc(L('من يرى بيانات التواصل؟', 'Who sees contact details?'))}</label><select id="pf_pc"><option value="all" ${pv.contact === 'all' ? 'selected' : ''}>${esc(L('كل أفراد العائلة المسجلين', 'All family members'))}</option><option value="close" ${pv.contact === 'close' ? 'selected' : ''}>${esc(L('الأقارب المقربون فقط (الدرجة ١–٢)', 'Close relatives only (1st–2nd degree)'))}</option><option value="admins" ${pv.contact === 'admins' ? 'selected' : ''}>${esc(L('المشرفون فقط', 'Admins only'))}</option></select></div>
+    <div class="field"><label>${esc(L('من يرى الصورة؟', 'Who sees the photo?'))}</label><select id="pf_pp"><option value="all" ${pv.photo === 'all' ? 'selected' : ''}>${esc(L('كل أفراد العائلة', 'All family members'))}</option><option value="close" ${pv.photo === 'close' ? 'selected' : ''}>${esc(L('الأقارب المقربون فقط', 'Close relatives only'))}</option><option value="hidden" ${pv.photo === 'hidden' ? 'selected' : ''}>${esc(L('مخفية (تظهر الأحرف الأولى فقط)', 'Hidden (initials only)'))}</option></select></div>
+    <label class="chk"><input type="checkbox" id="pf_consent" ${p.consent ? 'checked' : ''}> ${esc(mode === 'self' ? L('أوافق على عرض بياناتي لأفراد العائلة حسب الإعدادات أعلاه', 'I consent to sharing my details with family per the settings above') : L('تم الحصول على موافقة الشخص (أو وليّه إن كان قاصرًا)', 'Consent obtained from the person (or guardian if a minor)'))}</label>
+    <div class="hint">${esc(L('بيانات القاصرين تبقى محمية تلقائيًا أيًّا كان الإعداد.', "Minors' details stay protected regardless of these settings."))}</div></div>`;
+  h += `<button class="full-btn" data-act="savePerson" data-arg="${mode}|${esc(id || '')}">${esc(mode === 'add' ? L('إضافة إلى الشجرة', 'Add to tree') : L('حفظ', 'Save'))}</button></div>`;
+  openOv(h, () => wirePhoto('pf'));
+}
+CHG.toggleDeath = (a, v) => { const w = $('pf_dd_wrap'); if(w) w.classList.toggle('hidden', v === '1'); };
+function readPersonForm(mode){
+  const d = {};
+  if(mode !== 'self'){
+    d.name_ar = val('pf_name_ar'); if(!d.name_ar) throw L('الاسم بالعربية مطلوب', 'Arabic name is required');
+    d.name_en = val('pf_name_en'); d.gender = val('pf_gender'); d.living = val('pf_living') === '1'; d.statusUnknown = false;
+    d.birth = readDate('pf_b', L('الميلاد', 'Birth'));
+    d.death = d.living ? null : readDate('pf_dd', L('الوفاة', 'Death'));
+    if(d.birth && d.death && gYear(d.death) < gYear(d.birth)) throw L('تاريخ الوفاة يسبق تاريخ الميلاد', 'Death date is before birth date');
+    d.parentUnion = val('pf_parent') || null;
+    d.place_ar = val('pf_place_ar'); d.place_en = val('pf_place_en');
+    d.notes_ar = val('pf_notes_ar'); d.notes_en = val('pf_notes_en');
+  }
+  ['edu_ar', 'edu_en', 'job_ar', 'job_en'].forEach(k => d[k] = val('pf_' + k));
+  d.phone = val('pf_phone'); d.whatsapp = val('pf_wa').replace(/[^0-9]/g, ''); d.email = val('pf_email');
+  if(d.phone && !RX.phone.test(d.phone)) throw L('رقم الهاتف غير صحيح', 'Invalid phone number');
+  if(d.whatsapp && !RX.wa.test(d.whatsapp)) throw L('رقم الواتساب غير صحيح', 'Invalid WhatsApp number');
+  if(d.email && !RX.email.test(d.email)) throw L('الإيميل غير صحيح', 'Invalid email');
+  d.photo = safeImg(val('pf_photo')); d.socials = readSocials('pf');
+  d.privacy = { contact:val('pf_pc') || 'all', photo:val('pf_pp') || 'all' };
+  d.consent = !!($('pf_consent') && $('pf_consent').checked);
+  return d;
+}
+function changedFields(p, d){ const F = FIELD_LABEL(); return Object.keys(d).filter(k => JSON.stringify(p[k] ?? null) !== JSON.stringify(d[k] ?? null)).map(k => F[k] || k); }
+const DENIED = () => L('ليست لديك صلاحية لهذا الإجراء', 'You do not have permission for this action');
+ACT.savePerson = arg => {
+  const [mode, id] = arg.split('|');
+  try{
+    const d = readPersonForm(mode);
+    if(mode === 'add'){
+      let pu = d.parentUnion;
+      if(pu && pu.startsWith('new:')){ if(!canAddUnder(pu.slice(4))) throw DENIED(); }
+      else if(pu){ const u = DB.unions[pu]; if(!u || !u.partners.some(x => canAddUnder(x))) throw DENIED(); }
+      else if(!canAddRoot()) throw L('اختر الوالدين', 'Choose the parents');
+      beginChange();
+      if(pu && pu.startsWith('new:')){ const nu = { id:uid('u_'), partners:[pu.slice(4)], status:'married', start:null, end:null }; DB.unions[nu.id] = nu; pu = nu.id; }
+      const nid = uid('p_');
+      DB.persons[nid] = mkP(nid, Object.assign(d, { parentUnion:pu || null, order:pu ? childrenOfUnion(pu).length : 0 }));
+      log('add', nid, ''); closeOv(); commit(); toast(L('تمت الإضافة ✓', 'Added ✓')); openProfile(nid);
+    } else {
+      const p = P(id), cap = canEdit(id);
+      if(!cap || (mode === 'edit' && cap !== 'full')) throw DENIED();
+      if(mode === 'edit' && d.parentUnion !== p.parentUnion){
+        if(d.parentUnion){ const u = DB.unions[d.parentUnion]; if(!u || !u.partners.some(x => canAddUnder(x))) throw DENIED(); if(u.partners.some(x => x === id || isDescendant(x, id))) throw L('لا يمكن جعل شخص ابنًا لأحد ذريته', 'A person cannot become the child of their own descendant'); }
+        else if(!canAddRoot()) throw DENIED();
+        d.order = d.parentUnion ? childrenOfUnion(d.parentUnion).length : 0;
+      }
+      const ch = changedFields(p, d);
+      if(!ch.length){ closeOv(); return; }
+      beginChange(); Object.assign(p, d); log('edit', id, ch.join('، ')); closeOv(); commit(); toast(L('تم الحفظ ✓', 'Saved ✓')); openProfile(id);
+    }
+  }catch(e){ formError(typeof e === 'string' ? e : (e.message || String(e))); }
+};
+ACT.editPerson = id => personForm('edit', id);
+ACT.selfEdit = () => { const me = currentUser.personId; if(!P(me)){ toast(L('حسابك غير مرتبط بشخص في الشجرة بعد', 'Your account is not linked to a person yet')); return; } personForm(canEdit(me) === 'full' ? 'edit' : 'self', me); };
+ACT.addPerson = () => { if(!hasAnyAdd()){ toast(DENIED()); return; } personForm('add', null, null); };
+ACT.addChild = pid => { if(!canAddUnder(pid)) return toast(DENIED()); const us = unionsOf(pid); personForm('add', null, us.length ? us[us.length - 1].id : 'new:' + pid); };
+ACT.moveSib = arg => {
+  const [pid, dir] = arg.split('|'); const p = P(pid); if(canEdit(pid) !== 'full' || !p.parentUnion) return;
+  const sibs = childrenOfUnion(p.parentUnion), i = sibs.findIndex(x => x.id === pid), j = i + Number(dir);
+  if(j < 0 || j >= sibs.length){ toast(L('لا يمكن التحريك أكثر', 'Cannot move further')); return; }
+  beginChange(); [sibs[i], sibs[j]] = [sibs[j], sibs[i]]; sibs.forEach((s, k) => s.order = k); log('reorder', pid, ''); commit(); openProfile(pid);
+};
+ACT.deletePerson = pid => {
+  if(canEdit(pid) !== 'full') return toast(DENIED());
+  if(childrenOf(pid).length) return toast(L('لا يمكن حذف شخص له أبناء مسجلون. انقل الأبناء أو احذفهم أولًا.', 'Cannot delete a person with recorded children. Move or delete the children first.'), 4000);
+  confirmBox(L(`حذف «${name(pid)}» من الشجرة؟ لا يمكن التراجع عن الحذف من التطبيق.`, `Delete “${name(pid)}”? This cannot be undone from the app.`), () => {
+    beginChange(); const nm = P(pid).name_ar;
+    unionsOf(pid).forEach(u => delete DB.unions[u.id]);
+    DB.users.forEach(u => { if(u.personId === pid) u.personId = null; ['add', 'edit'].forEach(k => u.perms[k].branches = u.perms[k].branches.filter(b => b !== pid)); });
+    delete DB.persons[pid]; log('delete', null, nm);
+    if(treeState.rootId === pid) treeState.rootId = null;
+    closeOv(); commit(); toast(L('تم الحذف', 'Deleted'));
+  }, L('حذف', 'Delete'));
+};
+
+/* ---------- marriages ---------- */
+function unionStatusSelect(idp, cur){ return `<select id="${idp}" data-chg="unionStatus"><option value="married" ${cur === 'married' ? 'selected' : ''}>${esc(L('قائم', 'Ongoing'))}</option><option value="divorced" ${cur === 'divorced' ? 'selected' : ''}>${esc(L('انفصال / طلاق', 'Divorced'))}</option><option value="widowed" ${cur === 'widowed' ? 'selected' : ''}>${esc(L('انتهى بوفاة أحد الطرفين', 'Ended by death'))}</option></select>`; }
+CHG.unionStatus = (a, v) => { const w = $('un_end_wrap'); if(w) w.classList.toggle('hidden', v === 'married'); };
+ACT.addSpouse = pid => {
+  if(!(canEdit(pid) === 'full' || canAddUnder(pid))) return toast(DENIED());
+  const p = P(pid), sp = spousesOf(pid);
+  const h = `<div class="ov-pad"><h2 class="form-title">${esc(L('إضافة زواج لـ ', 'Add a marriage for ') + name(pid))}</h2><div class="form-error" id="f_err"></div>
+    <div class="field"><label>${esc(L('الطرف الآخر', 'Spouse'))}</label><select id="sp_mode" data-chg="spMode"><option value="new">${esc(L('شخص جديد غير مسجل', 'A new person'))}</option><option value="existing">${esc(L('شخص مسجل في الشجرة (مثل زواج الأقارب)', 'Someone already in the tree (e.g. cousin marriage)'))}</option></select></div>
+    <div id="sp_new"><div class="form-row-2"><div class="field"><label>${esc(L('الاسم بالعربية', 'Name (Arabic)'))} *</label><input id="sp_name_ar"></div><div class="field"><label>${esc(L('الاسم بالإنجليزية', 'Name (English)'))}</label><input id="sp_name_en" dir="ltr"></div></div>
+      <div class="field"><label>${esc(L('الجنس', 'Gender'))}</label><select id="sp_gender"><option value="f" ${p.gender === 'm' ? 'selected' : ''}>${esc(L('أنثى', 'Female'))}</option><option value="m" ${p.gender === 'f' ? 'selected' : ''}>${esc(L('ذكر', 'Male'))}</option></select></div></div>
+    <div id="sp_existing" class="hidden"><div class="field"><label>${esc(L('اختر الشخص', 'Choose person'))}</label><select id="sp_pid">${personOptions(null, x => x.id !== pid && !sp.includes(x.id))}</select></div></div>
+    <div class="field"><label>${esc(L('حالة الزواج', 'Status'))}</label>${unionStatusSelect('un_status', 'married')}</div>
+    ${dateField('un_s', L('تاريخ الزواج', 'Marriage date'), null)}
+    <div id="un_end_wrap" class="hidden">${dateField('un_e', L('تاريخ الانتهاء', 'End date'), null)}</div>
+    <div class="hint">${esc(L('يمكن تسجيل أكثر من زواج للشخص نفسه، وكل زواج يحمل أبناءه.', 'A person can have several marriages; each carries its own children.'))}</div>
+    <button class="full-btn" data-act="saveSpouse" data-arg="${esc(pid)}">${esc(L('حفظ', 'Save'))}</button></div>`;
+  openOv(h);
+};
+CHG.spMode = (a, v) => { $('sp_new').classList.toggle('hidden', v !== 'new'); $('sp_existing').classList.toggle('hidden', v === 'new'); };
+ACT.saveSpouse = pid => {
+  try{
+    if(!(canEdit(pid) === 'full' || canAddUnder(pid))) throw DENIED();
+    const status = val('un_status'), start = readDate('un_s', L('تاريخ الزواج', 'Marriage date')), end = status === 'married' ? null : readDate('un_e', L('تاريخ الانتهاء', 'End date'));
+    let other;
+    if(val('sp_mode') === 'existing'){
+      other = val('sp_pid'); if(!P(other)) throw L('اختر الشخص', 'Choose a person');
+      if(isDescendant(other, pid) || isDescendant(pid, other) || siblingsOf(pid).includes(other)) throw L('لا يمكن تسجيل زواج بين أصل وفرع أو بين إخوة', 'Cannot record a marriage between ancestor/descendant or siblings');
+      beginChange();
+    } else {
+      const n = val('sp_name_ar'); if(!n) throw L('الاسم بالعربية مطلوب', 'Arabic name is required');
+      beginChange(); other = uid('p_'); DB.persons[other] = mkP(other, { name_ar:n, name_en:val('sp_name_en'), gender:val('sp_gender'), consent:false });
+    }
+    const u = { id:uid('u_'), partners:[pid, other], status, start, end };
+    DB.unions[u.id] = u;
+    log('union', pid, name(other)); closeOv(); commit(); openProfile(pid);
+  }catch(e){ formError(typeof e === 'string' ? e : e.message); }
+};
+ACT.editUnion = uidv => {
+  const u = DB.unions[uidv]; if(!u || !u.partners.some(x => canEdit(x) === 'full')) return toast(DENIED());
+  const kids = childrenOfUnion(u.id).length;
+  openOv(`<div class="ov-pad"><h2 class="form-title">${esc(L('تعديل زواج: ', 'Edit marriage: ') + unionName(u))}</h2><div class="form-error" id="f_err"></div>
+    <div class="field"><label>${esc(L('حالة الزواج', 'Status'))}</label>${unionStatusSelect('un_status', u.status)}</div>
+    ${dateField('un_s', L('تاريخ الزواج', 'Marriage date'), u.start)}
+    <div id="un_end_wrap" class="${u.status === 'married' ? 'hidden' : ''}">${dateField('un_e', L('تاريخ الانتهاء', 'End date'), u.end)}</div>
+    <button class="full-btn" data-act="saveUnion" data-arg="${esc(u.id)}">${esc(L('حفظ', 'Save'))}</button>
+    ${kids ? `<p class="hint">${esc(L(`لا يمكن حذف هذا الزواج لأن له ${kids} من الأبناء.`, `This marriage has ${kids} child(ren) and cannot be deleted.`))}</p>` : `<button class="full-btn danger" data-act="deleteUnion" data-arg="${esc(u.id)}">${esc(L('حذف هذا الزواج', 'Delete this marriage'))}</button>`}</div>`);
+};
+ACT.saveUnion = uidv => {
+  const u = DB.unions[uidv];
+  try{ const status = val('un_status'); const start = readDate('un_s', L('تاريخ الزواج', 'Marriage date')); const end = status === 'married' ? null : readDate('un_e', L('تاريخ الانتهاء', 'End date'));
+    beginChange(); Object.assign(u, { status, start, end }); log('unionEdit', u.partners[0], unionStatus(u)); closeOv(); commit(); openProfile(u.partners[0]);
+  }catch(e){ formError(typeof e === 'string' ? e : e.message); }
+};
+ACT.deleteUnion = uidv => { const u = DB.unions[uidv]; if(!u || childrenOfUnion(u.id).length) return; confirmBox(L('حذف هذا الزواج؟', 'Delete this marriage?'), () => { beginChange(); const a = u.partners[0]; delete DB.unions[uidv]; log('unionDelete', a, ''); closeOv(); commit(); openProfile(a); }); };
+
+/* =====================================================================
+   SUGGESTIONS (member proposes → admin approves)
+   ===================================================================== */
+const SUG_FIELDS = ['name_ar', 'name_en', 'birth_y', 'living', 'death_y', 'place_ar', 'edu_ar', 'job_ar', 'notes_ar'];
+function sugCurrent(p, f){ if(f === 'birth_y') return p.birth ? String(p.birth.y) : ''; if(f === 'death_y') return p.death ? String(p.death.y) : ''; if(f === 'living') return p.living ? '1' : '0'; return p[f] || ''; }
+function sugDisplay(f, v){ if(f === 'living') return v === '1' ? L('على قيد الحياة', 'Living') : L('متوفى', 'Deceased'); return v === '' ? '—' : v; }
+ACT.suggest = pid => {
+  const p = P(pid), F = FIELD_LABEL();
+  let h = `<div class="ov-pad"><h2 class="form-title">${esc(L('اقتراح تصحيح: ', 'Suggest a correction: ') + name(pid))}</h2><p class="hint">${esc(L('عدّل ما تراه خطأ فقط. يصل اقتراحك للمشرف المسؤول عن هذا الفرع ليوافق عليه أو يرفضه.', 'Change only what is wrong. The admin responsible for this branch will approve or reject it.'))}</p><div class="form-error" id="f_err"></div>`;
+  SUG_FIELDS.forEach(f => {
+    if(f === 'living') h += `<div class="field"><label>${esc(F.living)}</label><select id="sg_living"><option value="1" ${p.living ? 'selected' : ''}>${esc(L('على قيد الحياة', 'Living'))}</option><option value="0" ${!p.living ? 'selected' : ''}>${esc(L('متوفى', 'Deceased'))}</option></select></div>`;
+    else if(f === 'notes_ar') h += `<div class="field"><label>${esc(F.notes_ar)}</label><textarea id="sg_notes_ar" rows="2">${esc(p.notes_ar)}</textarea></div>`;
+    else h += `<div class="field"><label>${esc(F[f])}</label><input id="sg_${f}" ${/_y$/.test(f) ? 'inputmode="numeric" maxlength="4"' : ''} ${f === 'name_en' ? 'dir="ltr"' : ''} value="${esc(sugCurrent(p, f))}"></div>`;
+  });
+  h += `<div class="field"><label>${esc(L('مصدر المعلومة أو ملاحظة للمشرف', 'Source or note for the admin'))}</label><textarea id="sg_comment" rows="2"></textarea></div><button class="full-btn" data-act="sendSuggestion" data-arg="${esc(pid)}">${esc(L('إرسال الاقتراح', 'Send suggestion'))}</button></div>`;
+  openOv(h);
+};
+ACT.sendSuggestion = pid => {
+  try{
+    const p = P(pid), changes = {};
+    SUG_FIELDS.forEach(f => { const nv = val('sg_' + f), ov = sugCurrent(p, f); if(nv !== ov) changes[f] = { from:ov, to:nv }; });
+    ['birth_y', 'death_y'].forEach(f => { if(changes[f] && changes[f].to && !/^\d{3,4}$/.test(changes[f].to)) throw L('السنة يجب أن تكون أرقامًا', 'Year must be numeric'); });
+    if(changes.name_ar && !changes.name_ar.to) throw L('لا يمكن أن يكون الاسم فارغًا', 'Name cannot be empty');
+    const comment = val('sg_comment');
+    if(!Object.keys(changes).length && !comment) throw L('لم تغيّر أي حقل', 'You did not change anything');
+    DB.suggestions.unshift({ id:uid('s_'), pid, by:currentUser.username, ts:Date.now(), changes, comment, status:'pending' });
+    const approvers = DB.users.filter(u => u.active && u.username !== currentUser.username && canEdit(pid, u) === 'full');
+    approvers.forEach(u => notify(u.username, `طلب تصحيح جديد على ${p.name_ar} من ${currentUser.name_ar}`, `New correction request for ${p.name_en || p.name_ar} from ${currentUser.name_en || currentUser.name_ar}`));
+    save(); closeOv(); renderAll(); toast(L(`أُرسل اقتراحك إلى ${approvers.length} مشرف ✓`, `Sent to ${approvers.length} admin(s) ✓`));
+  }catch(e){ formError(typeof e === 'string' ? e : e.message); }
+};
+function applySuggestion(s){
+  const p = P(s.pid); if(!p) return;
+  for(const [f, { to }] of Object.entries(s.changes)){
+    if(f === 'birth_y') p.birth = to ? { y:Number(to), m:null, d:null, cal:(p.birth && p.birth.cal) || 'g', approx:false } : null;
+    else if(f === 'death_y') p.death = to ? { y:Number(to), m:null, d:null, cal:(p.death && p.death.cal) || 'g', approx:false } : null;
+    else if(f === 'living'){ p.living = to === '1'; if(p.living) p.death = null; }
+    else p[f] = to;
+  }
+}
+async function decide(sid, ok){
+  const s = DB.suggestions.find(x => x.id === sid); if(!s || s.status !== 'pending' || canEdit(s.pid) !== 'full' || s.by === currentUser.username) return toast(DENIED());
+  s.status = ok ? 'approved' : 'rejected'; renderAll();
+  const { error } = await sb.rpc('decide_suggestion', { p_id:sid, p_approve:ok });
+  if(error) toast(serverMsg(error), 6000); else toast(ok ? L('تم التطبيق ✓', 'Applied ✓') : L('تم الرفض', 'Rejected'));
+  gen++; if(await reload(true)) afterLoad();
+}
+ACT.approve = sid => decide(sid, true);
+ACT.reject = sid => decide(sid, false);
+function suggestionHtml(s, actions){
+  const F = FIELD_LABEL();
+  const rows = Object.entries(s.changes).map(([f, c]) => `<tr><td class="muted">${esc(F[f] || f)}</td><td class="old">${esc(sugDisplay(f, c.from))}</td><td class="new">${esc(sugDisplay(f, c.to))}</td></tr>`).join('');
+  const st = { pending:L('بانتظار المراجعة', 'Pending'), approved:L('مقبول', 'Approved'), rejected:L('مرفوض', 'Rejected') }[s.status];
+  return `<div class="req-item"><div>${P(s.pid) ? linkBtn(s.pid) : '—'} · <span class="muted small">${esc(L('من ', 'by ') + userDisplay(s.by))} · ${esc(fmtAgo(s.ts))}</span> <span class="status-pill ${s.status === 'approved' ? 'living' : s.status === 'rejected' ? 'pending' : 'minor'}">${esc(st)}</span></div>
+    ${rows ? `<table class="diff">${rows}</table>` : ''}${s.comment ? `<p class="small" style="margin:4px 0">💬 ${esc(s.comment)}</p>` : ''}
+    ${actions ? `<div class="row2" style="margin-top:8px"><button class="full-btn ghost" data-act="reject" data-arg="${esc(s.id)}">${esc(L('رفض', 'Reject'))}</button><button class="full-btn" data-act="approve" data-arg="${esc(s.id)}">${esc(L('موافقة وتطبيق', 'Approve & apply'))}</button></div>` : ''}</div>`;
+}
+
+/* =====================================================================
+   NEWS
+   ===================================================================== */
+const NEWS_TYPES = () => ({ birth:['👶', L('مولود جديد', 'New arrival')], marriage:['💍', L('زواج', 'Marriage')], death:['🕊️', L('وفاة', 'Passing')], announcement:['📣', L('إعلان عائلي', 'Announcement')] });
+function renderNews(){
+  const T = NEWS_TYPES();
+  const items = [...DB.news].sort((a, b) => b.ts - a.ts);
+  $('tabNews').innerHTML = `<h2 style="font-size:17px;margin:16px 0 8px;">${esc(L('الأخبار العائلية', 'Family news'))}</h2>` + (items.length ? items.map(n => `<div class="news-card"><span class="news-tag ${esc(n.type)}">${T[n.type][0]} ${esc(T[n.type][1])}</span><h3>${esc(L(n.title_ar, n.title_en || n.title_ar))}</h3><p>${esc(L(n.body_ar, n.body_en || n.body_ar))}</p><div class="news-meta"><span>${esc(new Date(n.ts).toISOString().slice(0, 10))} · ${esc(userDisplay(n.by))}</span>${P(n.pid) ? `<button class="child-chip" data-open="${esc(n.pid)}">👤 ${esc(name(n.pid))}</button>` : ''}</div></div>`).join('') : `<p class="muted">${esc(L('لا أخبار بعد', 'No news yet'))}</p>`);
+}
+ACT.newsCompose = () => {
+  if(!canPublish()) return toast(DENIED());
+  const T = NEWS_TYPES(), unions = unionOptionsFor(null, null);
+  openOv(`<div class="ov-pad"><h2 class="form-title">${esc(L('نشر خبر جديد', 'Publish news'))}</h2><div class="form-error" id="f_err"></div>
+    <div class="field"><label>${esc(L('نوع الخبر', 'Type'))}</label><select id="nw_type" data-chg="newsType">${Object.entries(T).map(([k, [i, l]]) => `<option value="${k}">${i} ${esc(l)}</option>`).join('')}</select></div>
+    <div id="nw_birth_wrap" class="fieldset"><p>${esc(L('إضافة المولود إلى الشجرة', 'Add the baby to the tree'))}</p>
+      ${unions.length ? `<div class="field"><label>${esc(L('الوالدان', 'Parents'))}</label><select id="nw_parent">${unions.map(o => `<option value="${esc(o.v)}">${esc(o.label)}</option>`).join('')}</select></div>
+      <div class="form-row-2"><div class="field"><label>${esc(L('اسم المولود', 'Baby name'))}</label><input id="nw_baby_ar"></div><div class="field"><label>${esc(L('بالإنجليزية', 'In English'))}</label><input id="nw_baby_en" dir="ltr"></div></div>
+      <div class="field"><label>${esc(L('الجنس', 'Gender'))}</label><select id="nw_baby_g"><option value="m">${esc(L('ذكر', 'Male'))}</option><option value="f">${esc(L('أنثى', 'Female'))}</option></select></div>
+      <p class="hint">${esc(L('اترك الاسم فارغًا لنشر الخبر فقط دون إضافة.', 'Leave the name empty to publish without adding.'))}</p>` : `<p class="hint">${esc(L('لا تملك صلاحية إضافة أفراد؛ سيُنشر الخبر فقط، ويمكن للمشرف إضافة المولود لاحقًا.', 'You cannot add people; the news will be published and an admin can add the baby later.'))}</p>`}</div>
+    <div id="nw_person_wrap" class="field hidden"><label>${esc(L('الشخص المعني', 'Person concerned'))}</label><select id="nw_person"><option value="">—</option>${personOptions(null)}</select></div>
+    <div id="nw_death_wrap" class="fieldset hidden"><label class="chk"><input type="checkbox" id="nw_upd" checked> ${esc(L('تحديث حالة الشخص في الشجرة إلى «متوفى»', 'Update the person to “deceased” in the tree'))}</label>${dateField('nw_dd', L('تاريخ الوفاة', 'Date of passing'), null)}<p class="hint">${esc(L('إن لم تكن مشرفًا على هذا الشخص يتحول التحديث إلى طلب تصحيح للمشرف.', 'If you do not administer this person, the update becomes a correction request.'))}</p></div>
+    <div class="field"><label>${esc(L('العنوان بالعربية', 'Title (Arabic)'))} *</label><input id="nw_title_ar"></div>
+    <div class="field"><label>${esc(L('العنوان بالإنجليزية', 'Title (English)'))}</label><input id="nw_title_en" dir="ltr"></div>
+    <div class="field"><label>${esc(L('التفاصيل بالعربية', 'Details (Arabic)'))} *</label><textarea id="nw_body_ar" rows="3"></textarea></div>
+    <div class="field"><label>${esc(L('التفاصيل بالإنجليزية', 'Details (English)'))}</label><textarea id="nw_body_en" dir="ltr" rows="3"></textarea></div>
+    <button class="full-btn" data-act="publishNews">${esc(L('نشر الخبر', 'Publish'))}</button></div>`);
+};
+CHG.newsType = (a, v) => { $('nw_birth_wrap').classList.toggle('hidden', v !== 'birth'); $('nw_person_wrap').classList.toggle('hidden', v === 'birth'); $('nw_death_wrap').classList.toggle('hidden', v !== 'death'); };
+ACT.publishNews = () => {
+  try{
+    const type = val('nw_type'), ta = val('nw_title_ar'), ba = val('nw_body_ar');
+    if(!ta || !ba) throw L('العنوان والتفاصيل بالعربية مطلوبة', 'Arabic title and details are required');
+    let pid = null, note = '';
+    const today = new Date(), dToday = { y:today.getFullYear(), m:today.getMonth() + 1, d:today.getDate(), cal:'g', approx:false };
+    if(type === 'birth'){
+      const bn = val('nw_baby_ar'), pu = val('nw_parent');
+      if(bn && pu){ const u = DB.unions[pu]; if(!u || !u.partners.some(x => canAddUnder(x))) throw DENIED(); beginChange(); pid = uid('p_'); DB.persons[pid] = mkP(pid, { name_ar:bn, name_en:val('nw_baby_en'), gender:val('nw_baby_g'), birth:dToday, parentUnion:pu, order:childrenOfUnion(pu).length, consent:false }); log('add', pid, L('عبر خبر مولود', 'via birth news')); note = L(' وأُضيف المولود للشجرة', ' and the baby was added'); }
+      else beginChange();
+    } else {
+      pid = val('nw_person') || null;
+      if(type === 'death' && !pid) throw L('اختر الشخص المتوفى', 'Choose the person who passed');
+      const dd = type === 'death' ? (readDate('nw_dd', L('تاريخ الوفاة', 'Date of passing')) || dToday) : null;
+      beginChange();
+      if(type === 'death' && $('nw_upd').checked){
+        if(canEdit(pid) === 'full'){ Object.assign(P(pid), { living:false, death:dd }); log('edit', pid, L('تحديث الحالة إلى متوفى', 'marked deceased')); note = L(' وحُدّثت الشجرة', ' and the tree was updated'); }
+        else { DB.suggestions.unshift({ id:uid('s_'), pid, by:currentUser.username, ts:Date.now(), changes:{ living:{from:'1', to:'0'}, death_y:{from:'', to:String(dd.y)} }, comment:L('مرفق بخبر وفاة', 'Attached to a death notice'), status:'pending' }); DB.users.filter(u => u.active && canEdit(pid, u) === 'full').forEach(u => notify(u.username, `طلب تحديث وفاة: ${P(pid).name_ar}`, `Death update request: ${P(pid).name_en || P(pid).name_ar}`)); note = L(' وأُرسل طلب تحديث الشجرة للمشرف', ' and an update request was sent to the admin'); }
+      }
+    }
+    DB.news.push({ id:uid('n_'), type, pid, title_ar:ta, title_en:val('nw_title_en'), body_ar:ba, body_en:val('nw_body_en'), ts:Date.now(), by:currentUser.username });
+    notify('*', 'خبر جديد: ' + ta, 'New post: ' + (val('nw_title_en') || ta));
+    log('news', pid, ta); closeOv(); commit(); toast(L('نُشر الخبر', 'Published') + note, 3500);
+  }catch(e){ formError(typeof e === 'string' ? e : e.message); }
+};
+
+/* =====================================================================
+   ACCOUNT
+   ===================================================================== */
+const openPanels = new Set();
+function renderAccount(){
+  const u = currentUser, me = P(u.personId) ? u.personId : null, mp = me ? P(me) : null;
+  let h = `<div class="acc-card"><div class="acc-profile">${mp ? avatarHtml(mp) : `<div class="avatar living">${esc(initialOf(u.name_ar))}</div>`}<div><h3>${esc(L(u.name_ar, u.name_en || u.name_ar))}</h3><p dir="ltr" style="text-align:start">@${esc(u.username)}</p><span class="role-tag">${esc(roleLabel(u))}</span></div></div>
+    ${me ? `<div class="row2" style="margin-top:12px"><button class="full-btn ghost" data-open="${esc(me)}">👤 ${esc(L('ملفي في الشجرة', 'My profile'))}</button><button class="full-btn" data-act="selfEdit">✎ ${esc(L('تعديل بياناتي', 'Edit my details'))}</button></div>` : `<p class="hint">${esc(L('حسابك غير مرتبط بشخص في الشجرة.', 'Your account is not linked to a person in the tree.'))}</p>`}</div>`;
+  if(mp && mp.living && !isMinor(mp) && !mp.consent) h += `<div class="acc-card alert"><p class="section-title">🔒 ${esc(L('موافقتك مطلوبة', 'Your consent is needed'))}</p><p class="small" style="line-height:1.7;margin:0 0 6px">${esc(L('بيانات تواصلك مخفية حاليًا عن بقية العائلة. إن وافقت ستظهر حسب إعدادات الخصوصية التي تختارها، ويمكنك تعديلها في أي وقت.', 'Your contact details are currently hidden from the family. If you consent they will be shown per your privacy settings, which you can change anytime.'))}</p><button class="full-btn" data-act="consentYes">${esc(L('أوافق', 'I consent'))}</button></div>`;
+  const pend = pendingForMe();
+  if(pend.length) h += `<div class="acc-card alert"><p class="section-title">📝 ${esc(L('طلبات تصحيح بانتظار موافقتك', 'Corrections awaiting your approval'))} (${pend.length})</p>${pend.map(s => suggestionHtml(s, true)).join('')}</div>`;
+  const mine = DB.suggestions.filter(s => s.by === u.username).slice(0, 10);
+  if(mine.length) h += `<div class="acc-card"><p class="section-title">${esc(L('اقتراحاتي', 'My suggestions'))}</p>${mine.map(s => suggestionHtml(s, false)).join('')}</div>`;
+  h += `<div class="acc-card"><p class="section-title">${esc(L('تغيير كلمة المرور', 'Change password'))}</p><div class="form-error" id="pw_err"></div>
+    <div class="field"><label>${esc(L('كلمة المرور الحالية', 'Current password'))}</label><input id="pw_cur" type="password" autocomplete="current-password"></div>
+    <div class="form-row-2"><div class="field"><label>${esc(L('الجديدة (٦ أحرف على الأقل)', 'New (min 6)'))}</label><input id="pw_new" type="password" autocomplete="new-password"></div><div class="field"><label>${esc(L('تأكيدها', 'Confirm'))}</label><input id="pw_new2" type="password" autocomplete="new-password"></div></div>
+    <button class="full-btn" data-act="savePw">${esc(L('حفظ', 'Save'))}</button></div>`;
+  if(isAdmin()){
+    const vis = DB.audit.filter(a => u.super || (a.pid && P(a.pid) && canEdit(a.pid) === 'full')).slice(0, 30);
+    h += `<div class="acc-card"><p class="section-title">🕘 ${esc(L('سجل التعديلات', 'Audit log'))}</p>${vis.length ? vis.map(auditRow).join('') : `<p class="muted small" style="margin:0">${esc(L('لا تعديلات بعد', 'No changes yet'))}</p>`}</div>`;
+  }
+  if(u.super){
+    h += `<div class="acc-card"><p class="section-title">👥 ${esc(L('الأعضاء والصلاحيات', 'Members & permissions'))}</p>${DB.users.map(memberRow).join('')}${inviteListHtml()}<button class="full-btn" data-act="createUserForm">+ ${esc(L('دعوة فرد جديد', 'Invite a member'))}</button></div>`;
+    h += `<div class="acc-card"><p class="section-title">💾 ${esc(L('البيانات', 'Data'))}</p><div class="row2" style="flex-wrap:wrap"><button class="full-btn ghost" data-act="exportGed">GEDCOM ⬇</button><button class="full-btn ghost" data-act="exportJson">${esc(L('نسخة احتياطية', 'Backup'))} ⬇</button></div><p class="hint">${esc(L('ملف GEDCOM يفتح في أي برنامج أنساب (مثل Gimine وAncestry وMyHeritage). لا يتضمن أرقام الهواتف أو الإيميلات حفاظًا على الخصوصية.', 'GEDCOM opens in any genealogy app (Gimine, Ancestry, MyHeritage). Phone numbers and emails are excluded for privacy.'))}</p></div>`;
+  }
+  h += `<p class="hint" style="text-align:center">${esc(L('الإصدار ', 'Version ') + APP_VERSION)}</p>`;
+  h += `<button class="full-btn danger" data-act="logout" style="margin-bottom:20px">${esc(L('تسجيل الخروج', 'Log out'))}</button>`;
+  $('tabAccount').innerHTML = h;
+}
+function memberRow(u){
+  const linked = P(u.personId) ? name(u.personId) : L('غير مرتبط بشخص', 'not linked');
+  let h = `<div class="member-row"><div class="row-top"><div class="avatar living sm">${esc(initialOf(u.name_ar))}</div><div class="member-info"><b>${esc(L(u.name_ar, u.name_en || u.name_ar))}</b><span>@${esc(u.username)} · ${esc(roleLabel(u))} · ${esc(linked)}${u.active ? '' : ' · ' + esc(L('موقوف', 'disabled'))}</span></div>`;
+  if(!u.super) h += `<button class="gear-btn" data-act="togglePanel" data-arg="${esc(u.username)}" aria-label="settings">⚙</button><button class="toggle-switch ${u.active ? 'on' : ''}" data-act="toggleActive" data-arg="${esc(u.username)}" aria-label="active"></button>`;
+  h += `</div>`;
+  if(!u.super && openPanels.has(u.username)){
+    const taken = new Set(DB.users.filter(x => x !== u && x.personId).map(x => x.personId));
+    h += `<div class="perm-panel"><div class="perm-row"><label>${esc(L('مرتبط بالشخص', 'Linked person'))}</label><select data-chg="linkPerson" data-arg="${esc(u.username)}"><option value="">—</option>${personOptions(u.personId, p => !taken.has(p.id))}</select></div>`;
+    for(const k of ['add', 'edit']){
+      const sc = u.perms[k];
+      h += `<div class="perm-row"><label>${esc(k === 'add' ? L('صلاحية الإضافة', 'Add people') : L('صلاحية التعديل', 'Edit data'))}</label><select data-chg="scope" data-arg="${esc(u.username)}|${k}"><option value="none" ${sc.scope === 'none' ? 'selected' : ''}>${esc(L('بلا صلاحية', 'None'))}</option><option value="branch" ${sc.scope === 'branch' ? 'selected' : ''}>${esc(L('فروع محددة', 'Specific branches'))}</option><option value="full" ${sc.scope === 'full' ? 'selected' : ''}>${esc(L('كل الأشجار', 'Everything'))}</option></select></div>`;
+      if(sc.scope === 'branch') h += `<div style="margin:-2px 0 10px">${sc.branches.filter(P).map(b => `<span class="branch-chip">${esc(name(b))}<button data-act="rmBranch" data-arg="${esc(u.username)}|${k}|${esc(b)}" aria-label="remove">✕</button></span>`).join('')}<select data-chg="addBranch" data-arg="${esc(u.username)}|${k}" style="margin-top:4px;width:100%;padding:7px;border-radius:8px;border:1px solid var(--line);font-size:12px;background:var(--paper-raised)"><option value="">${esc(L('+ أضف فرعًا (الشخص وذريته وأزواجهم)', '+ Add a branch (person, descendants & spouses)'))}</option>${personOptions(null, p => !sc.branches.includes(p.id))}</select></div>`;
+    }
+    h += `<div class="perm-row"><label>${esc(L('نشر الأخبار', 'Publish news'))}</label><button class="toggle-switch ${u.perms.publish ? 'on' : ''}" data-act="togglePublish" data-arg="${esc(u.username)}" aria-label="publish"></button></div></div>`;
+  }
+  return h + `</div>`;
+}
+ACT.consentYes = () => { const p = P(currentUser.personId); if(!p) return; beginChange(); p.consent = true; log('consent', p.id, ''); commit(); toast(L('شكرًا، تم تسجيل موافقتك ✓', 'Thanks, consent recorded ✓')); };
+ACT.savePw = async () => {
+  const e = $('pw_err'); e.style.display = 'none';
+  const fail = m => { e.textContent = m; e.style.display = 'block'; };
+  const cur = $('pw_cur').value, n = $('pw_new').value;
+  if(n.length < 6) return fail(L('كلمة المرور الجديدة قصيرة', 'New password is too short'));
+  if(n !== $('pw_new2').value) return fail(L('التأكيد لا يطابق', 'Confirmation does not match'));
+  const { data } = await sb.auth.getUser(); const email = data && data.user && data.user.email;
+  const chk = await sb.auth.signInWithPassword({ email, password:cur });
+  if(chk.error) return fail(L('كلمة المرور الحالية غير صحيحة', 'Current password is incorrect'));
+  const up = await sb.auth.updateUser({ password:n });
+  if(up.error) return fail(authMsg(up.error));
+  renderAccount(); toast(L('تم تغيير كلمة المرور ✓', 'Password changed ✓'));
+};
+const mustSuper = () => { if(!currentUser.super){ toast(DENIED()); return false; } return true; };
+ACT.togglePanel = un => { if(openPanels.has(un)) openPanels.delete(un); else openPanels.add(un); renderAccount(); };
+ACT.toggleActive = un => { if(!mustSuper()) return; const u = userByName(un); beginChange(); u.active = !u.active; log('perm', u.personId, '@' + un + ' ' + (u.active ? 'on' : 'off')); commit(); };
+ACT.togglePublish = un => { if(!mustSuper()) return; const u = userByName(un); beginChange(); u.perms.publish = !u.perms.publish; log('perm', u.personId, '@' + un); commit(); };
+CHG.linkPerson = (un, v) => { if(!mustSuper()) return; const u = userByName(un); if(v && DB.users.some(x => x !== u && x.personId === v)){ toast(L('هذا الشخص مرتبط بحساب آخر', 'This person is linked to another account')); return renderAccount(); } beginChange(); u.personId = v || null; log('link', v || null, '@' + un); commit(); };
+CHG.scope = (arg, v) => { if(!mustSuper()) return; const [un, k] = arg.split('|'); const u = userByName(un); beginChange(); u.perms[k].scope = v; log('perm', u.personId, '@' + un + ' ' + k + '=' + v); commit(); };
+CHG.addBranch = (arg, v) => { if(!mustSuper() || !v) return; const [un, k] = arg.split('|'); const u = userByName(un); beginChange(); if(!u.perms[k].branches.includes(v)) u.perms[k].branches.push(v); log('perm', u.personId, '@' + un + ' +' + P(v).name_ar); commit(); };
+ACT.rmBranch = arg => { if(!mustSuper()) return; const [un, k, b] = arg.split('|'); const u = userByName(un); beginChange(); u.perms[k].branches = u.perms[k].branches.filter(x => x !== b); log('perm', u.personId, '@' + un); commit(); };
+function inviteCode(){ const A = 'abcdefghjkmnpqrstuvwxyz23456789', b = new Uint8Array(10); crypto.getRandomValues(b); return [...b].map(x => A[x % A.length]).join(''); }
+function inviteText(i){
+  const url = location.origin + location.pathname.replace(/index\.html$/, '');
+  return `مرحبًا ${i.name_ar}، هذه دعوتك إلى تطبيق شجرة العائلة:\n\n١) افتح الرابط: ${url}\n٢) اضغط «لديّ رمز دعوة — إنشاء حساب»\n٣) الإيميل: ${i.email}\n٤) رمز الدعوة: ${i.code}\n٥) اختر كلمة مرور خاصة بك\n\nلتثبيته كتطبيق: في الآيفون افتح الرابط في Safari ثم زر المشاركة ثم «إضافة إلى الشاشة الرئيسية». في أندرويد افتحه في Chrome ثم «تثبيت التطبيق».\nالرمز خاص بك، فلا ترسله لأحد.`;
+}
+function inviteListHtml(){
+  const pend = DB.invitations.filter(i => !i.used);
+  if(!pend.length) return '';
+  return `<p class="section-h">${esc(L('دعوات لم تُستخدم بعد', 'Pending invitations'))}</p>` + pend.map(i => `<div class="member-row"><div class="row-top"><div class="member-info"><b>${esc(i.name_ar)}</b><span dir="ltr">${esc(i.email)}</span></div><button class="mini-btn" data-act="showInvite" data-arg="${esc(i.code)}">${esc(L('عرض الدعوة', 'Show'))}</button><button class="mini-btn" data-act="rmInvite" data-arg="${esc(i.code)}">${esc(L('إلغاء', 'Cancel'))}</button></div></div>`).join('');
+}
+ACT.createUserForm = () => {
+  if(!mustSuper()) return;
+  const taken = new Set([...DB.users.map(x => x.personId), ...DB.invitations.filter(i => !i.used).map(i => i.personId)].filter(Boolean));
+  openOv(`<div class="ov-pad"><h2 class="form-title">${esc(L('دعوة فرد من العائلة', 'Invite a family member'))}</h2><div class="form-error" id="f_err"></div>
+    <div class="field"><label>${esc(L('من هو في الشجرة؟', 'Who are they in the tree?'))}</label><select id="nu_person" data-chg="nuPerson"><option value="">— ${esc(L('غير موجود في الشجرة', 'not in the tree'))} —</option>${personOptions(null, p => !taken.has(p.id))}</select></div>
+    <div class="form-row-2"><div class="field"><label>${esc(L('الاسم بالعربية', 'Name (Arabic)'))} *</label><input id="nu_name_ar"></div><div class="field"><label>${esc(L('بالإنجليزية', 'English'))}</label><input id="nu_name_en" dir="ltr"></div></div>
+    <div class="field"><label>${esc(L('إيميله', 'Their email'))} *</label><input id="nu_email" type="email" dir="ltr" inputmode="email" autocapitalize="off"></div>
+    <p class="hint">${esc(L('سيُنشأ رمز دعوة خاص بهذا الإيميل. ترسله أنت بالواتساب، ويدخل العضو عضوًا عاديًا، ثم تمنحه الصلاحيات من هذه الصفحة إن أردت.', 'A code bound to this email is created. You send it yourself; they join as a regular member and you can grant permissions afterwards.'))}</p>
+    <button class="full-btn" data-act="createUser">${esc(L('إنشاء الدعوة', 'Create invitation'))}</button></div>`);
+};
+CHG.nuPerson = (a, v) => { if(P(v)){ $('nu_name_ar').value = P(v).name_ar; $('nu_name_en').value = P(v).name_en; } };
+ACT.createUser = () => {
+  try{
+    if(!mustSuper()) return;
+    const na = val('nu_name_ar'), email = val('nu_email').toLowerCase();
+    if(!na) throw L('الاسم مطلوب', 'Name is required');
+    if(!RX.email.test(email)) throw L('اكتب إيميلًا صحيحًا', 'Enter a valid email');
+    if(DB.invitations.some(i => !i.used && i.email === email)) throw L('توجد دعوة قائمة لهذا الإيميل', 'There is already a pending invitation for this email');
+    const inv = { code:inviteCode(), email, personId:val('nu_person') || null, name_ar:na, name_en:val('nu_name_en'), used:false, ts:Date.now() };
+    DB.invitations.push(inv); commit(); ACT.showInvite(inv.code);
+  }catch(e){ formError(typeof e === 'string' ? e : e.message); }
+};
+ACT.showInvite = code => {
+  const i = DB.invitations.find(x => x.code === code); if(!i) return;
+  openOv(`<div class="ov-pad"><h2 class="form-title">${esc(L('دعوة ', 'Invitation for ') + i.name_ar)}</h2><div class="field"><textarea readonly id="exp_text" rows="12" style="line-height:1.8">${esc(inviteText(i))}</textarea></div><button class="full-btn" data-act="copyExport">${esc(L('نسخ الرسالة', 'Copy message'))}</button><p class="hint">${esc(L('الصقها في واتساب وأرسلها لصاحبها فقط. الرمز يعمل مرة واحدة ومع هذا الإيميل فقط.', 'Paste it into WhatsApp and send it only to this person. The code works once and only with this email.'))}</p></div>`);
+};
+ACT.rmInvite = code => confirmBox(L('إلغاء هذه الدعوة؟', 'Cancel this invitation?'), () => { DB.invitations = DB.invitations.filter(i => i.code !== code); commit(); });
+
+/* ---------- export / import ---------- */
+function toGedcom(){
+  const I = {}, F = {}; let i = 1, j = 1;
+  Object.keys(DB.persons).forEach(k => I[k] = `@I${i++}@`); Object.keys(DB.unions).forEach(k => F[k] = `@F${j++}@`);
+  const M = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+  const gd = d => { if(!d || !d.y) return null; if(d.cal === 'h') return `(${[d.d, d.m, d.y].filter(Boolean).join('/')} AH)`; return (d.approx ? 'ABT ' : '') + (d.d && d.m ? d.d + ' ' : '') + (d.m ? M[d.m - 1] + ' ' : '') + d.y; };
+  const one = s => String(s || '').replace(/[\r\n]+/g, ' ').trim();
+  const L0 = ['0 HEAD', '1 SOUR FAMILY_TREE_PROTOTYPE', '2 VERS 2.0', '1 GEDC', '2 VERS 5.5.1', '2 FORM LINEAGE-LINKED', '1 CHAR UTF-8'];
+  for(const p of Object.values(DB.persons)){
+    L0.push(`0 ${I[p.id]} INDI`, `1 NAME ${one(p.name_ar)}`); if(p.name_en) L0.push(`1 NAME ${one(p.name_en)}`, '2 TYPE aka');
+    L0.push(`1 SEX ${p.gender === 'f' ? 'F' : 'M'}`);
+    if(p.birth || p.place_ar || p.place_en){ L0.push('1 BIRT'); const b = gd(p.birth); if(b) L0.push(`2 DATE ${b}`); if(p.place_en || p.place_ar) L0.push(`2 PLAC ${one(p.place_en || p.place_ar)}`); }
+    if(!p.living){ const d = gd(p.death); L0.push(d ? '1 DEAT' : '1 DEAT Y'); if(d) L0.push(`2 DATE ${d}`); }
+    if(p.job_en || p.job_ar) L0.push(`1 OCCU ${one(p.job_en || p.job_ar)}`);
+    if(p.edu_en || p.edu_ar) L0.push(`1 EDUC ${one(p.edu_en || p.edu_ar)}`);
+    if(p.notes_ar || p.notes_en) L0.push(`1 NOTE ${one(p.notes_ar || p.notes_en)}`);
+    if(p.parentUnion && F[p.parentUnion]) L0.push(`1 FAMC ${F[p.parentUnion]}`);
+    unionsOf(p.id).forEach(u => L0.push(`1 FAMS ${F[u.id]}`));
+  }
+  for(const u of Object.values(DB.unions)){
+    L0.push(`0 ${F[u.id]} FAM`);
+    const hs = u.partners.find(x => !isF(x)), wf = u.partners.find(x => isF(x) && x !== hs);
+    if(hs) L0.push(`1 HUSB ${I[hs]}`); if(wf) L0.push(`1 WIFE ${I[wf]}`);
+    childrenOfUnion(u.id).forEach(c => L0.push(`1 CHIL ${I[c.id]}`));
+    if(u.start){ L0.push('1 MARR'); L0.push(`2 DATE ${gd(u.start)}`); }
+    if(u.status === 'divorced'){ L0.push('1 DIV'); if(u.end) L0.push(`2 DATE ${gd(u.end)}`); }
+  }
+  L0.push('0 TRLR');
+  return L0.join('\n');
+}
+function exportView(title, filename, text, mime){
+  openOv(`<div class="ov-pad"><h2 class="form-title">${esc(title)}</h2><div class="field"><textarea class="mono" readonly id="exp_text">${esc(text)}</textarea></div><button class="full-btn" data-act="copyExport">${esc(L('نسخ المحتوى', 'Copy contents'))}</button><p class="hint">${esc(L(`الصق المحتوى في ملف نصي واحفظه باسم ${filename}`, `Paste into a text file saved as ${filename}`))}</p></div>`);
+}
+ACT.copyExport = () => { const t = $('exp_text'); t.select(); try{ navigator.clipboard.writeText(t.value).then(() => toast(L('تم النسخ ✓', 'Copied ✓')), () => { document.execCommand('copy'); toast(L('تم النسخ ✓', 'Copied ✓')); }); }catch(e){ document.execCommand('copy'); toast(L('تم النسخ ✓', 'Copied ✓')); } };
+ACT.exportGed = () => { if(mustSuper()) exportView('GEDCOM 5.5.1', 'family-tree.ged', toGedcom(), 'text/plain'); };
+ACT.exportJson = () => { if(mustSuper()) exportView(L('نسخة احتياطية كاملة (JSON)', 'Full backup (JSON)'), 'family-tree-backup.json', JSON.stringify(DB, null, 1), 'application/json'); };
+/* ---------- boot ---------- */
+lang = store.get('ft.lang') === 'en' ? 'en' : 'ar';
+applyDir();
+(async function boot(){
+  renderLogin();
+  try{ const { data } = await sb.auth.getSession(); if(data && data.session && !(await enterApp())) await sb.auth.signOut(); }catch(e){}
+})();
+document.addEventListener('visibilitychange', () => { if(!document.hidden && currentUser && Date.now() - lastLoad > 60000) queueReload(); });
+if('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});
+
+</script>
+</body>
+</html>
