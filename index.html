@@ -892,7 +892,7 @@ function clampCrop(){ cropState.tx = Math.min(0, Math.max(CROP_VIEWPORT - cropSt
 /* =====================================================================
    LOGIN
    ===================================================================== */
-const APP_VERSION = 'v6';
+const APP_VERSION = 'v7';
 let loginMode = 'in', loginBusy = false;
 function renderLogin(){
   const up = loginMode === 'up';
@@ -1008,10 +1008,15 @@ const treeState = { rootId:null, mode:'list', expanded:new Set(), all:false, sta
 /* The family trees shown on the home screen, for every member. Matched by the person's name. */
 const ICON = { tree:'<svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22v-7"></path><path d="M12 15c-4 0-7-2.5-7-6a5 5 0 015-5 4.5 4.5 0 018 1 4.5 4.5 0 01.5 9c-1.5 1-4 1-6.5 1z"></path></svg>', news:'<svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"></rect><path d="M7 9h10M7 13h10M7 17h6"></path></svg>', user:'<svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"></circle><path d="M4 21a8 8 0 0116 0"></path></svg>', sprout:'<svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22V11"></path><path d="M12 11C12 7 9 5 5 5c0 4 2 7 7 6z"></path><path d="M12 14c0-3 2.5-5 7-5 0 4-2.5 6-7 5z"></path></svg>' };
 const FAMILIES = [
-  { name_en:'Mustafa Bakhit Mohammed', name_ar:'مصطفى بخيت محمد', ar:'عائلة مصطفى بخيت', en:'Mustafa Bakhit family', icon:ICON.tree },
-  { name_en:'Abdelrahman Ahmed Barakat', name_ar:'عبدالرحمن أحمد بركات', ar:'عائلة عبدالرحمن بركات', en:'Abdelrahman Barakat family', icon:ICON.tree }
+  { roots:[['Mustafa Bakhit Mohammed', 'مصطفى بخيت محمد']], ar:'عائلة مصطفى بخيت', en:'Mustafa Bakhit family', icon:ICON.tree },
+  /* Root is the eldest recorded Barakat ancestor; falls back to Abdelrahman until the Barakat import is done. */
+  { roots:[['Ahmed Barakat Suliman', 'أحمد بركات سليمان'], ['Abdelrahman Ahmed Barakat', 'عبدالرحمن أحمد بركات']], ar:'عائلة بركات سليمان', en:'Barakat Suliman family', icon:ICON.tree }
 ];
-const familyRoot = f => { const p = Object.values(DB.persons).find(x => x.name_en === f.name_en) || Object.values(DB.persons).find(x => x.name_ar === f.name_ar); return p ? p.id : null; };
+const familyRoot = f => {
+  const ps = Object.values(DB.persons);
+  for(const [en, ar] of f.roots){ const p = ps.find(x => norm(x.name_en) === norm(en)) || ps.find(x => norm(x.name_ar) === norm(ar)); if(p) return p.id; }
+  return null;
+};
 const isOpen = id => id === treeState.rootId || treeState.all || treeState.expanded.has(id);
 function upcomingEvents(days){
   const today = new Date(); today.setHours(0, 0, 0, 0);
@@ -1508,7 +1513,7 @@ function renderAccount(){
   }
   if(u.super){
     h += `<div class="acc-card"><p class="section-title">👥 ${esc(L('الأعضاء والصلاحيات', 'Members & permissions'))}</p>${DB.users.map(memberRow).join('')}${inviteListHtml()}<button class="full-btn" data-act="createUserForm">+ ${esc(L('دعوة فرد جديد', 'Invite a member'))}</button></div>`;
-    h += `<div class="acc-card"><p class="section-title">💾 ${esc(L('البيانات', 'Data'))}</p><div class="row2" style="flex-wrap:wrap"><button class="full-btn ghost" data-act="exportGed">GEDCOM ⬇</button><button class="full-btn ghost" data-act="exportJson">${esc(L('نسخة احتياطية', 'Backup'))} ⬇</button></div><p class="hint">${esc(L('ملف GEDCOM يفتح في أي برنامج أنساب (مثل Gimine وAncestry وMyHeritage). لا يتضمن أرقام الهواتف أو الإيميلات حفاظًا على الخصوصية.', 'GEDCOM opens in any genealogy app (Gimine, Ancestry, MyHeritage). Phone numbers and emails are excluded for privacy.'))}</p></div>`;
+    h += `<div class="acc-card"><p class="section-title">💾 ${esc(L('البيانات', 'Data'))}</p><div class="row2" style="flex-wrap:wrap"><button class="full-btn ghost" data-act="exportGed">GEDCOM ⬇</button><button class="full-btn ghost" data-act="exportJson">${esc(L('نسخة احتياطية', 'Backup'))} ⬇</button><button class="full-btn ghost" data-act="importForm">${esc(L('استيراد عائلة', 'Import a family'))} ⬆</button></div><p class="hint">${esc(L('ملف GEDCOM يفتح في أي برنامج أنساب (مثل Gimine وAncestry وMyHeritage). لا يتضمن أرقام الهواتف أو الإيميلات حفاظًا على الخصوصية.', 'GEDCOM opens in any genealogy app (Gimine, Ancestry, MyHeritage). Phone numbers and emails are excluded for privacy.'))}</p></div>`;
   }
   h += `<p class="hint" style="text-align:center">${esc(L('الإصدار ', 'Version ') + APP_VERSION)}</p>`;
   h += `<button class="full-btn danger" data-act="logout" style="margin-bottom:20px">${esc(L('تسجيل الخروج', 'Log out'))}</button>`;
@@ -1626,6 +1631,102 @@ function exportView(title, filename, text, mime){
 }
 ACT.copyExport = () => { const t = $('exp_text'); t.select(); try{ navigator.clipboard.writeText(t.value).then(() => toast(L('تم النسخ ✓', 'Copied ✓')), () => { document.execCommand('copy'); toast(L('تم النسخ ✓', 'Copied ✓')); }); }catch(e){ document.execCommand('copy'); toast(L('تم النسخ ✓', 'Copied ✓')); } };
 ACT.exportGed = () => { if(mustSuper()) exportView('GEDCOM 5.5.1', 'family-tree.ged', toGedcom(), 'text/plain'); };
+/* ---------- import a family (super admin) ----------
+   Format: { people:[{ key, name_ar, name_en, gender:'m'|'f', living, status_unknown, birth_y, death_y, phone }],
+             unions:[{ partners:[key, key?], children:[key…] }] }
+   People already in the tree (same English or Arabic name) are reused, never duplicated. */
+let importPlan = null;
+ACT.importForm = () => {
+  if(!mustSuper()) return;
+  importPlan = null;
+  openOv(`<div class="ov-pad"><h2 class="form-title">${esc(L('استيراد عائلة', 'Import a family'))}</h2><div class="form-error" id="f_err"></div>
+    <p class="hint">${esc(L('الصق ملف الاستيراد (JSON). الأشخاص الموجودون في الشجرة بنفس الاسم يُربطون ولا يُكرَّرون. ستظهر لك معاينة قبل الحفظ.', 'Paste the import file (JSON). People already in the tree with the same name are linked, not duplicated. You will see a preview before anything is saved.'))}</p>
+    <div class="field"><textarea class="mono" id="imp_text" spellcheck="false"></textarea></div>
+    <button class="full-btn" data-act="importPreview">${esc(L('معاينة', 'Preview'))}</button><div id="imp_preview"></div></div>`);
+};
+function buildImportPlan(text){
+  let d; try{ d = JSON.parse(text); }catch(e){ throw L('الملف ليس JSON صحيحًا', 'Not valid JSON'); }
+  if(!d || !Array.isArray(d.people) || !Array.isArray(d.unions)) throw L('الملف يجب أن يحتوي people و unions', 'File must contain people and unions');
+  const byKey = {};
+  d.people.forEach(x => {
+    if(!x || !x.key || byKey[x.key]) throw L('مفتاح شخص مفقود أو مكرر: ', 'Missing or duplicate person key: ') + (x && x.key);
+    if(!String(x.name_ar || '').trim()) throw L('الاسم العربي مطلوب: ', 'Arabic name required: ') + x.key;
+    if(x.gender !== 'm' && x.gender !== 'f') throw L('الجنس غير صحيح: ', 'Invalid gender: ') + x.key;
+    byKey[x.key] = x;
+  });
+  const ps = Object.values(DB.persons), ids = {}, used = new Set(), problems = [];
+  const take = (x, id) => { if(used.has(id)) throw L('شخصان في الملف يطابقان نفس الفرد: ', 'Two entries match the same person: ') + name(id); used.add(id); ids[x.key] = id; };
+  /* 1) exact full-name match (Arabic or English) */
+  for(const x of d.people){
+    const hits = ps.filter(p => (x.name_en && norm(p.name_en) === norm(x.name_en)) || norm(p.name_ar) === norm(x.name_ar));
+    if(hits.length > 1) throw L('أكثر من شخص في الشجرة بنفس الاسم: ', 'Several people in the tree share this name: ') + x.name_ar;
+    if(hits.length) take(x, hits[0].id);
+  }
+  /* 2) structural match: same first name + gender among the existing children / spouses of an already-matched relative */
+  const first = s => norm(s).split(/\s+/)[0] || '';
+  const sameFirst = (p, x) => p.gender === x.gender && ((x.name_en && p.name_en && first(p.name_en) === first(x.name_en)) || first(p.name_ar) === first(x.name_ar));
+  const pick = (cands, x) => { const c = [...new Set(cands)].filter(id => P(id) && !used.has(id) && sameFirst(P(id), x)); return c.length === 1 ? c[0] : null; };
+  for(let changed = true; changed;){
+    changed = false;
+    for(const u of d.unions){
+      const known = (u.partners || []).filter(k => ids[k]).map(k => ids[k]);
+      if(!known.length) continue;
+      let kidPool = childrenOf(known[0]); if(known.length > 1) kidPool = kidPool.filter(c => childrenOf(known[1]).includes(c));
+      for(const k of u.children || []){ const x = byKey[k]; if(!x || ids[k]) continue; const m = pick(kidPool, x); if(m){ take(x, m); changed = true; } }
+      for(const k of u.partners || []){ const x = byKey[k]; if(!x || ids[k]) continue; const m = pick(known.flatMap(spousesOf), x); if(m){ take(x, m); changed = true; } }
+    }
+  }
+  const matched = [], fresh = [];
+  for(const x of d.people){ if(ids[x.key]) matched.push([x, ids[x.key]]); else { ids[x.key] = uid('p_'); fresh.push(x); } }
+  const childSeen = new Set(), unions = [];
+  for(const u of d.unions){
+    const parts = (u.partners || []).map(k => { if(!byKey[k]) throw L('شريك غير معروف: ', 'Unknown partner: ') + k; return ids[k]; });
+    if(parts.length < 1 || parts.length > 2 || new Set(parts).size !== parts.length) throw L('زواج غير صالح', 'Invalid marriage');
+    const same = Object.values(DB.unions).find(e => e.partners.length === parts.length && parts.every(p => e.partners.includes(p)));
+    const uidv = same ? same.id : uid('u_'), kids = [];
+    (u.children || []).forEach((k, i) => {
+      if(!byKey[k]) throw L('ابن غير معروف: ', 'Unknown child: ') + k;
+      if(childSeen.has(k)) throw L('شخص له أكثر من والدين في الملف: ', 'Person listed under two sets of parents: ') + byKey[k].name_ar;
+      childSeen.add(k);
+      const cid = ids[k], ex = P(cid);
+      if(parts.includes(cid) || parts.some(p => P(p) && P(cid) && isDescendant(p, cid))) throw L('دورة في النسب عند: ', 'Ancestry loop at: ') + byKey[k].name_ar;
+      if(ex && ex.parentUnion && ex.parentUnion !== uidv){ problems.push(L(`«${name(cid)}» مسجل بوالدين آخرين في الشجرة — تُرك كما هو`, `“${name(cid)}” already has other parents in the tree — left unchanged`)); return; }
+      if(ex && ex.parentUnion === uidv) return;
+      kids.push([cid, i]);
+    });
+    unions.push({ id:uidv, isNew:!same, partners:parts, kids });
+  }
+  return { byKey, ids, matched, fresh, unions, problems };
+}
+ACT.importPreview = () => {
+  try{
+    importPlan = buildImportPlan(val('imp_text'));
+    const pl = importPlan, nu = pl.unions.filter(u => u.isNew).length, links = pl.unions.reduce((a, u) => a + u.kids.length, 0);
+    $('imp_preview').innerHTML = `<div class="info-card"><h3>${esc(L('المعاينة', 'Preview'))}</h3>
+      <p class="small">${esc(L(`${pl.fresh.length} شخصًا جديدًا · ${pl.matched.length} موجودون مسبقًا · ${nu} زواجًا جديدًا · ${links} رابط أبوة`, `${pl.fresh.length} new people · ${pl.matched.length} already in the tree · ${nu} new marriages · ${links} parent links`))}</p>
+      ${pl.matched.length ? `<p class="section-title">${esc(L('سيُربطون بالموجودين (لن يُكرَّروا)', 'Linked to existing (not duplicated)'))}</p><p class="small">${pl.matched.map(([x, id]) => esc(x.name_ar) + ' ← ' + esc(name(id))).join('<br>')}</p>` : ''}
+      ${pl.problems.length ? `<p class="section-title">⚠️ ${esc(L('تنبيهات', 'Warnings'))}</p><p class="small">${pl.problems.map(esc).join('<br>')}</p>` : ''}
+      <p class="section-title">${esc(L('الجدد', 'New people'))}</p><p class="small">${pl.fresh.map(x => esc(x.name_ar) + (x.name_en ? ` <span class="muted">(${esc(x.name_en)})</span>` : '')).join('، ')}</p>
+      <button class="full-btn" data-act="importApply">${esc(L('استيراد وحفظ', 'Import & save'))}</button></div>`;
+  }catch(e){ importPlan = null; $('imp_preview').innerHTML = ''; formError(typeof e === 'string' ? e : e.message); }
+};
+ACT.importApply = () => {
+  const pl = importPlan; if(!pl || !mustSuper()) return;
+  confirmBox(L(`إضافة ${pl.fresh.length} شخصًا إلى الشجرة؟`, `Add ${pl.fresh.length} people to the tree?`), () => {
+    beginChange();
+    const yd = y => (Number.isInteger(y) ? { y, m:null, d:null, cal:'g', approx:false } : null);
+    pl.fresh.forEach(x => {
+      const living = x.living !== false;
+      DB.persons[pl.ids[x.key]] = mkP(pl.ids[x.key], { name_ar:String(x.name_ar).trim(), name_en:String(x.name_en || '').trim(), gender:x.gender, living,
+        statusUnknown:!!x.status_unknown && living, birth:yd(x.birth_y), death:living ? null : yd(x.death_y), phone:RX.phone.test(x.phone || '') ? x.phone : '', consent:false });
+    });
+    pl.unions.forEach(u => {
+      if(u.isNew) DB.unions[u.id] = { id:u.id, partners:u.partners.slice(), status:'married', start:null, end:null };
+      u.kids.forEach(([cid, i]) => { const p = P(cid); p.parentUnion = u.id; p.order = i; });
+    });
+    importPlan = null; closeOv(); commit(); toast(L('تم الاستيراد ✓', 'Imported ✓'), 3500);
+  }, L('استيراد', 'Import'));
+};
 ACT.exportJson = () => { if(mustSuper()) exportView(L('نسخة احتياطية كاملة (JSON)', 'Full backup (JSON)'), 'family-tree-backup.json', JSON.stringify(DB, null, 1), 'application/json'); };
 /* ---------- boot ---------- */
 lang = store.get('ft.lang') === 'en' ? 'en' : 'ar';
