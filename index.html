@@ -359,12 +359,40 @@
   .overlay,.modal-mini{background:rgba(2,6,14,0.7);}
   .search-results,.notif-panel{box-shadow:0 8px 24px rgba(0,0,0,0.5);}
   input::placeholder,textarea::placeholder{color:#8A96AD;}
+  header.app-bar .brand{white-space:nowrap;min-width:0;}
+  .lang-btn{background:var(--btn);}
+  .ts-btn{min-width:34px;padding:0 8px;font-size:13px;}
+  .icon-btn:disabled{opacity:.35;cursor:default;}
+  .login-lang #loginThemeBtn{padding:6px 10px;}
+  @media (max-width:420px){ header.app-bar{padding:10px 10px;} .bar-actions{gap:4px;} .icon-btn{min-width:32px;height:32px;padding:0 7px;} .lang-btn{padding:7px 11px;} header.app-bar .brand{font-size:15.5px;gap:6px;} }
+
+  /* ----- light (day) theme ----- */
+  :root[data-theme="light"]{
+    --ink:#1B2333; --ink-soft:#5B6678;
+    --paper:#F6F3EC; --paper-raised:#FFFFFF; --raised-2:#EFE8D8;
+    --gold:#B7791F; --gold-deep:#9A6413; --gold-bg:#FBF1DC;
+    --btn:#F5B544; --on-btn:#1A1300;
+    --living:#1E8E4E; --living-bg:#E2F4E9;
+    --deceased:#6B7280; --deceased-bg:#ECEEF1;
+    --line:#E0D8C8; --danger:#C0392B; --danger-bg:#FBE7E5;
+    --info:#2563EB; --info-bg:#E6EEFB;
+    color-scheme:light;
+  }
+  :root[data-theme="light"] .children-indent{border-inline-start-color:#CFC4AE;}
+  :root[data-theme="light"] .chart li::before,:root[data-theme="light"] .chart li::after,:root[data-theme="light"] .chart ul::before{border-color:#CFC4AE;}
+  :root[data-theme="light"] .toggle-switch{background:#CFC4AE;}
+  :root[data-theme="light"] .toggle-switch.on{background:#2E9E62;}
+  :root[data-theme="light"] .news-tag.marriage{background:#FBF0DA;color:#8A5A0F;}
+  :root[data-theme="light"] .news-tag.announcement{background:#EEE9FB;color:#5B3FB5;}
+  :root[data-theme="light"] .overlay,:root[data-theme="light"] .modal-mini{background:rgba(27,35,51,0.45);}
+  :root[data-theme="light"] .search-results,:root[data-theme="light"] .notif-panel{box-shadow:0 8px 24px rgba(27,35,51,0.15);}
+  :root[data-theme="light"] input::placeholder,:root[data-theme="light"] textarea::placeholder{color:#8E97A6;}
 </style>
 </head>
 <body>
 
 <div class="login-screen" id="loginScreen">
-  <div class="login-lang"><button data-act="lang" id="loginLangToggle"></button></div>
+  <div class="login-lang"><button data-act="theme" id="loginThemeBtn" aria-label="theme"></button> <button data-act="lang" id="loginLangToggle"></button></div>
   <div class="login-brand"><div class="mark"><svg aria-hidden="true" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22v-7"></path><path d="M12 15c-4 0-7-2.5-7-6a5 5 0 015-5 4.5 4.5 0 018 1 4.5 4.5 0 01.5 9c-1.5 1-4 1-6.5 1z"></path></svg></div><h1 id="loginTitle"></h1><p id="loginSub"></p></div>
   <div class="login-error" id="loginError"></div>
   <div class="field"><label id="lblUsername" for="loginUsername"></label><input id="loginUsername" type="email" inputmode="email" autocomplete="email" autocapitalize="off" dir="ltr"></div>
@@ -380,7 +408,9 @@
     <div class="brand"><span class="dot"></span><span id="brandText"></span></div>
     <div class="bar-actions">
       <button class="icon-btn hidden" id="undoBtn" data-act="undo"></button>
-      <button class="icon-btn" id="textSizeBtn" data-act="textSize">A</button>
+      <button class="icon-btn ts-btn" dir="ltr" id="textSmallBtn" data-act="textSize" data-arg="-1" aria-label="smaller text">A−</button>
+      <button class="icon-btn ts-btn" dir="ltr" id="textBigBtn" data-act="textSize" data-arg="1" aria-label="larger text">A+</button>
+      <button class="icon-btn" id="themeBtn" data-act="theme" aria-label="theme"></button>
       <button class="icon-btn" id="notifBtn" data-act="bell" aria-label="notifications">🔔<span class="badge hidden" id="notifBadge"></span></button>
       <button class="lang-btn" id="langToggle" data-act="lang"></button>
     </div>
@@ -896,7 +926,7 @@ function clampCrop(){ cropState.tx = Math.min(0, Math.max(CROP_VIEWPORT - cropSt
 /* =====================================================================
    LOGIN
    ===================================================================== */
-const APP_VERSION = 'v8';
+const APP_VERSION = 'v9';
 let loginMode = 'in', loginBusy = false;
 function renderLogin(){
   const up = loginMode === 'up';
@@ -959,11 +989,20 @@ ACT.logout = force => {
   if(was) sb.auth.signOut().catch(() => {});
 };
 ACT.lang = () => { lang = lang === 'ar' ? 'en' : 'ar'; store.set('ft.lang', lang); applyDir(); closeOv(); if(currentUser) renderAll(); else renderLogin(); };
-function applyDir(){ document.documentElement.lang = lang; document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr'; document.title = L('شجرة العائلة', 'Family Tree'); }
+function applyDir(){ if(typeof applyTheme === 'function') setTimeout(applyTheme); document.documentElement.lang = lang; document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr'; document.title = L('شجرة العائلة', 'Family Tree'); }
 const TEXT_SIZES = [0.9, 1, 1.15, 1.3];
 let textSizeIdx = Number(store.get('ft.textSize') || 1); if(!(textSizeIdx in TEXT_SIZES)) textSizeIdx = 1;
-function applyTextSize(){ document.documentElement.style.setProperty('--tz', TEXT_SIZES[textSizeIdx]); $('mainContainer').style.zoom = TEXT_SIZES[textSizeIdx]; $('ovSheet').style.zoom = TEXT_SIZES[textSizeIdx]; $('textSizeBtn').textContent = ['A−', 'A', 'A+', 'A++'][textSizeIdx]; }
-ACT.textSize = () => { textSizeIdx = (textSizeIdx + 1) % TEXT_SIZES.length; store.set('ft.textSize', String(textSizeIdx)); applyTextSize(); };
+function applyTextSize(){ document.documentElement.style.setProperty('--tz', TEXT_SIZES[textSizeIdx]); $('mainContainer').style.zoom = TEXT_SIZES[textSizeIdx]; $('ovSheet').style.zoom = TEXT_SIZES[textSizeIdx]; $('textSmallBtn').disabled = textSizeIdx === 0; $('textBigBtn').disabled = textSizeIdx === TEXT_SIZES.length - 1; }
+ACT.textSize = d => { const n = textSizeIdx + Number(d || 1); if(!(n in TEXT_SIZES)) return; textSizeIdx = n; store.set('ft.textSize', String(textSizeIdx)); applyTextSize(); };
+/* Day / night theme — remembered per device; first visit follows the phone's setting. */
+let theme = store.get('ft.theme') || (window.matchMedia && matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+function applyTheme(){
+  document.documentElement.dataset.theme = theme;
+  document.querySelector('meta[name="theme-color"]').setAttribute('content', theme === 'light' ? '#F6F3EC' : '#0B1220');
+  const ico = theme === 'light' ? '🌙' : '☀️', lbl = theme === 'light' ? L('الوضع الليلي', 'Dark mode') : L('الوضع النهاري', 'Light mode');
+  ['themeBtn', 'loginThemeBtn'].forEach(id => { const b = $(id); if(b){ b.textContent = ico; b.title = lbl; b.setAttribute('aria-label', lbl); } });
+}
+ACT.theme = () => { theme = theme === 'light' ? 'dark' : 'light'; store.set('ft.theme', theme); applyTheme(); };
 
 /* =====================================================================
    SHELL
@@ -975,9 +1014,9 @@ function renderAll(){
   if(!fresh || !fresh.active){ ACT.logout(); return; }
   currentUser = fresh;
   $('brandText').textContent = L('شجرة العائلة', 'Family Tree');
-  $('langToggle').textContent = L('English', 'العربية');
+  $('langToggle').textContent = L('EN', 'ع'); $('langToggle').title = L('English', 'العربية');
   $('undoBtn').classList.toggle('hidden', !undoStack.length || !isAdmin());
-  $('undoBtn').textContent = L('↶ تراجع', '↶ Undo');
+  $('undoBtn').textContent = '↶'; $('undoBtn').title = L('تراجع', 'Undo'); $('undoBtn').setAttribute('aria-label', L('تراجع', 'Undo'));
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.id === activeTab));
   renderNav(); renderTreeTab(); renderNews(); renderAccount(); renderNotifs(); applyTextSize();
   $('fabNews').classList.toggle('hidden', !(activeTab === 'tabNews' && canPublish()));
@@ -1734,7 +1773,7 @@ ACT.importApply = () => {
 ACT.exportJson = () => { if(mustSuper()) exportView(L('نسخة احتياطية كاملة (JSON)', 'Full backup (JSON)'), 'family-tree-backup.json', JSON.stringify(DB, null, 1), 'application/json'); };
 /* ---------- boot ---------- */
 lang = store.get('ft.lang') === 'en' ? 'en' : 'ar';
-applyDir();
+applyDir(); applyTheme();
 (async function boot(){
   renderLogin();
   try{ const { data } = await sb.auth.getSession(); if(data && data.session && !(await enterApp())) await sb.auth.signOut(); }catch(e){}
