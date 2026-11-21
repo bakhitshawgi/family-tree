@@ -371,6 +371,16 @@
   .sheet-bar .sheet-handle{top:7px;}
   .photo-actions{display:flex;gap:6px;justify-content:center;margin:-2px 0 10px;}
   .photo-actions .mini-btn{background:var(--raised-2);color:var(--ink);border-radius:999px;padding:6px 12px;}
+  .greet{margin:12px 0 0;border-radius:18px;padding:16px;display:flex;gap:14px;align-items:center;border:1px solid var(--line);color:#fff;}
+  .greet.day{background:linear-gradient(135deg,#3B2A12 0%,#6B4513 55%,#C97A1E 100%);}
+  .greet.night{background:linear-gradient(135deg,#0E1631 0%,#1C2550 60%,#3B2F6B 100%);}
+  .greet-ico{flex:0 0 auto;display:flex;}
+  .greet-txt{flex:1;min-width:0;}
+  .greet-hi{font-size:17px;font-weight:800;}
+  .greet-d{font-size:12.5px;color:#E9E3D3;margin-top:4px;}
+  .greet-h{font-size:12px;color:#D6CFBF;margin-top:1px;}
+  .greet-time{font-size:24px;font-weight:800;color:#FFE08A;white-space:nowrap;}
+  @media (max-width:360px){ .greet{padding:12px;gap:10px;} .greet-ico svg{width:46px;height:46px;} .greet-time{font-size:20px;} }
   .ts-btn{min-width:34px;padding:0 8px;font-size:13px;}
   .icon-btn:disabled{opacity:.35;cursor:default;}
   .login-lang #loginThemeBtn{padding:6px 10px;}
@@ -405,7 +415,7 @@
   <div class="login-lang"><button data-act="theme" id="loginThemeBtn" aria-label="theme"></button> <button data-act="lang" id="loginLangToggle"></button></div>
   <div class="login-brand"><div class="mark"><svg aria-hidden="true" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22v-7"></path><path d="M12 15c-4 0-7-2.5-7-6a5 5 0 015-5 4.5 4.5 0 018 1 4.5 4.5 0 01.5 9c-1.5 1-4 1-6.5 1z"></path></svg></div><h1 id="loginTitle"></h1><p id="loginSub"></p></div>
   <div class="login-error" id="loginError"></div>
-  <div class="field"><label id="lblUsername" for="loginUsername"></label><input id="loginUsername" type="email" inputmode="email" autocomplete="email" autocapitalize="off" dir="ltr"></div>
+  <div class="field"><label id="lblUsername" for="loginUsername"></label><input id="loginUsername" type="text" autocomplete="username" autocapitalize="off" autocorrect="off" spellcheck="false" dir="ltr"></div>
   <div class="field"><label id="lblPassword" for="loginPassword"></label><input id="loginPassword" type="password" autocomplete="current-password" dir="ltr"></div>
   <div class="field hidden" id="inviteWrap"><label id="lblInvite" for="loginInvite"></label><input id="loginInvite" autocomplete="off" autocapitalize="off" spellcheck="false" dir="ltr"></div>
   <button class="login-btn" id="loginSubmit" data-act="login"></button>
@@ -481,6 +491,11 @@ const safeUrl = u => /^https?:\/\/[^\s<>"']+$/i.test(u || '') ? u : '';
 const safeImg = u => (/^data:image\/(png|jpe?g|webp);base64,[a-z0-9+/=]+$/i.test(u || '') || /^https:\/\/[^\s<>"']+$/i.test(u || '')) ? u : '';
 const uid = () => (crypto.randomUUID ? crypto.randomUUID() : '10000000-1000-4000-8000-100000000000'.replace(/[018]/g, c => (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)));
 function hashPw(s){ let h = 0x811c9dc5; for(const ch of 'ft-demo-salt:' + s){ h ^= ch.codePointAt(0); h = Math.imul(h, 0x01000193) >>> 0; } return 'fnv1a:' + h.toString(16); }
+/* Members without email sign in with a username; Supabase Auth still needs an email, so a username maps to a
+   non-deliverable address on the reserved .invalid domain (nothing is ever sent there). */
+const USER_DOMAIN = 'members.familytree.invalid';
+const userToEmail = u => u + '@' + USER_DOMAIN;
+const emailToUser = e => String(e || '').endsWith('@' + USER_DOMAIN) ? String(e).slice(0, -USER_DOMAIN.length - 1) : null;
 const RX = { phone:/^\+?[0-9][0-9 \-]{5,19}$/, wa:/^[0-9]{6,15}$/, email:/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/, user:/^[a-z0-9_.]{3,20}$/ };
 const norm = s => String(s || '').toLowerCase().replace(/[ً-ْـ]/g, '').replace(/[أإآٱ]/g, 'ا').replace(/ة/g, 'ه').replace(/ى/g, 'ي').trim();
 const store = { get(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }, set(k, v){ try{ localStorage.setItem(k, v); return true; }catch(e){ return false; } }, del(k){ try{ localStorage.removeItem(k); }catch(e){} } };
@@ -1019,14 +1034,14 @@ function clampCrop(){ cropState.tx = Math.min(0, Math.max(CROP_VIEWPORT - cropSt
 /* =====================================================================
    LOGIN
    ===================================================================== */
-const APP_VERSION = 'v14';
+const APP_VERSION = 'v15';
 let loginMode = 'in', loginBusy = false;
 function renderLogin(){
   const up = loginMode === 'up';
   $('loginLangToggle').textContent = L('English', 'العربية');
   $('loginTitle').textContent = L('شجرة العائلة', 'Family Tree');
   $('loginSub').textContent = up ? L('أول مرة؟ أنشئ حسابك برمز الدعوة الذي وصلك', 'First time? Create your account with the invitation code you received') : L('خاصة بأفراد العائلة فقط — الرجاء تسجيل الدخول', 'Private to family members — please sign in');
-  $('lblUsername').textContent = up ? L('الإيميل (نفسه المكتوب في الدعوة)', 'Email (the one in your invitation)') : L('الإيميل', 'Email');
+  $('lblUsername').textContent = up ? L('اسم المستخدم أو الإيميل (المكتوب في الدعوة)', 'Username or email (from your invitation)') : L('اسم المستخدم أو الإيميل', 'Username or email');
   $('lblPassword').textContent = up ? L('اختر كلمة مرور (٦ أحرف على الأقل)', 'Choose a password (min 6 characters)') : L('كلمة المرور', 'Password');
   $('loginPassword').autocomplete = up ? 'new-password' : 'current-password';
   $('lblInvite').textContent = L('رمز الدعوة', 'Invitation code');
@@ -1047,8 +1062,9 @@ function authMsg(e){
 ACT.loginMode = () => { loginMode = loginMode === 'in' ? 'up' : 'in'; loginErr(''); renderLogin(); };
 ACT.login = async () => {
   if(loginBusy) return;
-  const email = val('loginUsername').toLowerCase(), pw = $('loginPassword').value, code = val('loginInvite'), up = loginMode === 'up';
-  if(!RX.email.test(email)) return loginErr(L('اكتب إيميلًا صحيحًا', 'Enter a valid email'));
+  const ident = val('loginUsername').toLowerCase(), pw = $('loginPassword').value, code = val('loginInvite'), up = loginMode === 'up';
+  const email = ident.includes('@') ? ident : userToEmail(ident);
+  if(ident.includes('@') ? !RX.email.test(ident) : !RX.user.test(ident)) return loginErr(L('اكتب الإيميل أو اسم المستخدم بشكل صحيح', 'Enter a valid email or username'));
   if(pw.length < 6) return loginErr(L('كلمة المرور قصيرة (٦ أحرف على الأقل)', 'Password is too short (min 6 characters)'));
   if(up && !code) return loginErr(L('اكتب رمز الدعوة', 'Enter your invitation code'));
   loginBusy = true; loginErr(''); renderLogin();
@@ -1180,10 +1196,25 @@ function familyStats(){
   const top = Object.entries(counts).filter(([, c]) => c > 1).sort((a, b) => b[1] - a[1]).slice(0, 3);
   return { total:ps.length, living, gens, avg, top };
 }
+/* ---------- greeting card: greeting + Gregorian & Hijri dates + clock; colours and icon follow the time of day ---------- */
+const GREET_SUN = `<svg width="58" height="58" viewBox="0 0 64 64" aria-hidden="true"><defs><radialGradient id="ftSun" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#FFE08A"/><stop offset=".6" stop-color="#F5B544"/><stop offset="1" stop-color="#E8892B"/></radialGradient></defs><circle cx="32" cy="32" r="30" fill="#F5B544" opacity=".15"/><g stroke="#F5B544" stroke-width="3" stroke-linecap="round">${[0,45,90,135,180,225,270,315].map(a => `<line x1="32" y1="6" x2="32" y2="12" transform="rotate(${a} 32 32)"/>`).join('')}</g><circle cx="32" cy="32" r="14" fill="url(#ftSun)"/></svg>`;
+const GREET_MOON = `<svg width="58" height="58" viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="ftMoon" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFF3C4"/><stop offset="1" stop-color="#F5B544"/></linearGradient></defs><circle cx="32" cy="32" r="30" fill="#93C5FD" opacity=".10"/><path d="M40 14a18 18 0 1 0 10 30A15 15 0 0 1 40 14z" fill="url(#ftMoon)"/><g fill="#FFF3C4"><circle cx="16" cy="18" r="1.6"/><circle cx="22" cy="10" r="1"/><circle cx="12" cy="30" r="1.1"/><path d="M48 12l1.2 2.8 2.8 1.2-2.8 1.2L48 20l-1.2-2.8L44 16l2.8-1.2z"/></g></svg>`;
+function greetHtml(){
+  const d = new Date(), hr = d.getHours(), day = hr >= 5 && hr < 12;
+  const loc = (lang === 'ar' ? 'ar' : 'en-GB') + '-u-nu-latn', f = o => { try{ return new Intl.DateTimeFormat(loc, o).format(d); }catch(e){ return d.toLocaleString(); } };
+  let hij = ''; try{ hij = new Intl.DateTimeFormat((lang === 'ar' ? 'ar-SA' : 'en-GB') + '-u-ca-islamic-umalqura-nu-latn', { day:'numeric', month:'long', year:'numeric' }).format(d); }catch(e){}
+  const first = String(L(currentUser.name_ar, currentUser.name_en || currentUser.name_ar) || '').trim().split(/\s+/)[0];
+  const greet = day ? L('صباح الخير', 'Good morning') : L('مساء الخير', 'Good evening');
+  return `<div class="greet ${day ? 'day' : 'night'}"><div class="greet-ico">${day ? GREET_SUN : GREET_MOON}</div>
+    <div class="greet-txt"><div class="greet-hi">${esc(greet)}${first ? esc(L(' يا ', ', ') + first) : ''}</div><div class="greet-d">${esc(f({ weekday:'long' }) + L('، ', ', ') + f({ day:'numeric', month:'long', year:'numeric' }))}</div>${hij ? `<div class="greet-h">${esc(hij)}</div>` : ''}</div>
+    <div class="greet-time" dir="ltr">${esc(f({ hour:'numeric', minute:'2-digit', hour12:true }))}</div></div>`;
+}
+setInterval(() => { const g = $('greetCard'); if(g && currentUser && !document.hidden) g.innerHTML = greetHtml(); }, 20000);
 function renderTreeTab(){
   const el = $('tabTree');
   if(treeState.rootId && !P(treeState.rootId)) treeState.rootId = null;
-  let h = `<div class="search-wrap"><input id="searchInput" class="search-input" type="search" autocomplete="off" placeholder="${esc(L('🔎 ابحث عن أي فرد بالاسم (عربي أو إنجليزي)…', '🔎 Search anyone by name…'))}"><div id="searchResults" class="search-results hidden"></div></div>`;
+  let h = treeState.rootId ? '' : `<div id="greetCard">${greetHtml()}</div>`;
+  h += `<div class="search-wrap"><input id="searchInput" class="search-input" type="search" autocomplete="off" placeholder="${esc(L('🔎 ابحث عن أي فرد بالاسم (عربي أو إنجليزي)…', '🔎 Search anyone by name…'))}"><div id="searchResults" class="search-results hidden"></div></div>`;
   if(!treeState.rootId){
     const me = P(currentUser.personId) ? currentUser.personId : null, cards = [];
     FAMILIES.forEach(f => { const r = familyRoot(f); if(r) cards.push([r, L(f.ar, f.en), f.icon, descendantCount(r) + L(' فردًا من الذرية', ' descendants')]); });
@@ -1702,12 +1733,14 @@ ACT.rmBranch = arg => { if(!mustSuper()) return; const [un, k, b] = arg.split('|
 function inviteCode(){ const A = 'abcdefghjkmnpqrstuvwxyz23456789', b = new Uint8Array(10); crypto.getRandomValues(b); return [...b].map(x => A[x % A.length]).join(''); }
 function inviteText(i){
   const url = location.origin + location.pathname.replace(/index\.html$/, '');
+  const un = emailToUser(i.email);
+  if(un) return `مرحبًا ${i.name_ar}، هذه دعوتك إلى تطبيق شجرة العائلة:\n\n١) افتح الرابط: ${url}\n٢) اضغط «لديّ رمز دعوة — إنشاء حساب»\n٣) اسم المستخدم: ${un}\n٤) رمز الدعوة: ${i.code}\n٥) اختر كلمة مرور خاصة بك (٦ أحرف على الأقل)\n\nبعدها تدخل دائمًا باسم المستخدم وكلمة المرور. ويمكنك تغيير كلمة المرور من «حسابي».\nالرمز خاص بك، فلا ترسله لأحد.`;
   return `مرحبًا ${i.name_ar}، هذه دعوتك إلى تطبيق شجرة العائلة:\n\n١) افتح الرابط: ${url}\n٢) اضغط «لديّ رمز دعوة — إنشاء حساب»\n٣) الإيميل: ${i.email}\n٤) رمز الدعوة: ${i.code}\n٥) اختر كلمة مرور خاصة بك\n\nلتثبيته كتطبيق: في الآيفون افتح الرابط في Safari ثم زر المشاركة ثم «إضافة إلى الشاشة الرئيسية». في أندرويد افتحه في Chrome ثم «تثبيت التطبيق».\nالرمز خاص بك، فلا ترسله لأحد.`;
 }
 function inviteListHtml(){
   const pend = DB.invitations.filter(i => !i.used);
   if(!pend.length) return '';
-  return `<p class="section-h">${esc(L('دعوات لم تُستخدم بعد', 'Pending invitations'))}</p>` + pend.map(i => `<div class="member-row"><div class="row-top"><div class="member-info"><b>${esc(i.name_ar)}</b><span dir="ltr">${esc(i.email)}</span></div><button class="mini-btn" data-act="showInvite" data-arg="${esc(i.code)}">${esc(L('عرض الدعوة', 'Show'))}</button><button class="mini-btn" data-act="rmInvite" data-arg="${esc(i.code)}">${esc(L('إلغاء', 'Cancel'))}</button></div></div>`).join('');
+  return `<p class="section-h">${esc(L('دعوات لم تُستخدم بعد', 'Pending invitations'))}</p>` + pend.map(i => `<div class="member-row"><div class="row-top"><div class="member-info"><b>${esc(i.name_ar)}</b><span dir="ltr">${esc(emailToUser(i.email) ? '@' + emailToUser(i.email) : i.email)}</span></div><button class="mini-btn" data-act="showInvite" data-arg="${esc(i.code)}">${esc(L('عرض الدعوة', 'Show'))}</button><button class="mini-btn" data-act="rmInvite" data-arg="${esc(i.code)}">${esc(L('إلغاء', 'Cancel'))}</button></div></div>`).join('');
 }
 ACT.createUserForm = () => {
   if(!mustSuper()) return;
@@ -1715,18 +1748,24 @@ ACT.createUserForm = () => {
   openOv(`<div class="ov-pad"><h2 class="form-title">${esc(L('دعوة فرد من العائلة', 'Invite a family member'))}</h2><div class="form-error" id="f_err"></div>
     <div class="field"><label>${esc(L('من هو في الشجرة؟', 'Who are they in the tree?'))}</label><select id="nu_person" data-chg="nuPerson"><option value="">— ${esc(L('غير موجود في الشجرة', 'not in the tree'))} —</option>${personOptions(null, p => !taken.has(p.id))}</select></div>
     <div class="form-row-2"><div class="field"><label>${esc(L('الاسم بالعربية', 'Name (Arabic)'))} *</label><input id="nu_name_ar"></div><div class="field"><label>${esc(L('بالإنجليزية', 'English'))}</label><input id="nu_name_en" dir="ltr"></div></div>
-    <div class="field"><label>${esc(L('إيميله', 'Their email'))} *</label><input id="nu_email" type="email" dir="ltr" inputmode="email" autocapitalize="off"></div>
+    <div class="field"><label>${esc(L('طريقة الدخول', 'Sign-in method'))}</label><select id="nu_mode" data-chg="nuMode"><option value="user">${esc(L('اسم مستخدم (بدون إيميل)', 'Username (no email)'))}</option><option value="email">${esc(L('إيميل', 'Email'))}</option></select></div>
+    <div class="field" id="nu_user_wrap"><label>${esc(L('اسم المستخدم', 'Username'))} *</label><input id="nu_user" dir="ltr" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="mustafa.mahdi"><div class="hint">${esc(L('أحرف إنجليزية صغيرة وأرقام و . و _ فقط، من 3 إلى 20 حرفًا.', 'Lowercase English letters, digits, . and _ only, 3–20 characters.'))}</div></div>
+    <div class="field hidden" id="nu_email_wrap"><label>${esc(L('إيميله', 'Their email'))} *</label><input id="nu_email" type="email" dir="ltr" inputmode="email" autocapitalize="off"></div>
     <p class="hint">${esc(L('سيُنشأ رمز دعوة خاص بهذا الإيميل. ترسله أنت بالواتساب، ويدخل العضو عضوًا عاديًا، ثم تمنحه الصلاحيات من هذه الصفحة إن أردت.', 'A code bound to this email is created. You send it yourself; they join as a regular member and you can grant permissions afterwards.'))}</p>
     <button class="full-btn" data-act="createUser">${esc(L('إنشاء الدعوة', 'Create invitation'))}</button></div>`);
 };
+CHG.nuMode = (a, v) => { $('nu_user_wrap').classList.toggle('hidden', v !== 'user'); $('nu_email_wrap').classList.toggle('hidden', v === 'user'); };
 CHG.nuPerson = (a, v) => { if(P(v)){ $('nu_name_ar').value = P(v).name_ar; $('nu_name_en').value = P(v).name_en; } };
 ACT.createUser = () => {
   try{
     if(!mustSuper()) return;
-    const na = val('nu_name_ar'), email = val('nu_email').toLowerCase();
+    const na = val('nu_name_ar'), byUser = val('nu_mode') !== 'email';
     if(!na) throw L('الاسم مطلوب', 'Name is required');
-    if(!RX.email.test(email)) throw L('اكتب إيميلًا صحيحًا', 'Enter a valid email');
-    if(DB.invitations.some(i => !i.used && i.email === email)) throw L('توجد دعوة قائمة لهذا الإيميل', 'There is already a pending invitation for this email');
+    let email;
+    if(byUser){ const un = val('nu_user').toLowerCase(); if(!RX.user.test(un)) throw L('اسم المستخدم: أحرف إنجليزية صغيرة وأرقام و . و _ فقط (3–20)', 'Username: lowercase letters, digits, . and _ only (3–20)'); email = userToEmail(un);
+      if(DB.users.some(u => u.username === un)) throw L('اسم المستخدم مستخدم من قبل', 'This username is already taken'); }
+    else { email = val('nu_email').toLowerCase(); if(!RX.email.test(email)) throw L('اكتب إيميلًا صحيحًا', 'Enter a valid email'); }
+    if(DB.invitations.some(i => !i.used && i.email === email)) throw L('توجد دعوة قائمة لنفس اسم المستخدم أو الإيميل', 'There is already a pending invitation for this username or email');
     const inv = { code:inviteCode(), email, personId:val('nu_person') || null, name_ar:na, name_en:val('nu_name_en'), used:false, ts:Date.now() };
     DB.invitations.push(inv); commit(); ACT.showInvite(inv.code);
   }catch(e){ formError(typeof e === 'string' ? e : e.message); }
