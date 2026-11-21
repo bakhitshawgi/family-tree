@@ -390,6 +390,27 @@
   .ro-name{flex:1;min-width:0;font-weight:700;font-size:14.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   .ro-h{flex:0 0 auto;width:44px;height:40px;display:flex;align-items:center;justify-content:center;font-size:22px;color:var(--ink-soft);cursor:grab;touch-action:none;border-radius:10px;background:var(--raised-2);}
   .ro-item.dragging .ro-h{cursor:grabbing;color:var(--gold);}
+  /* ----- tree list: timeline branch; each generation's panel a shade lighter ----- */
+  .tree-wrap .children-indent{border-inline-start:2px dashed #3A4A6B;margin-inline-start:30px;padding:4px 0;padding-inline-start:16px;padding-inline-end:8px;border-radius:14px;background:#0F1729;}
+  .tree-wrap .children-indent .children-indent{background:#142039;}
+  .tree-wrap .children-indent .children-indent .children-indent{background:#1A2848;}
+  .tree-wrap .children-indent .children-indent .children-indent .children-indent{background:#203052;}
+  .tree-wrap .children-indent>.person-row{position:relative;}
+  .tree-wrap .children-indent>.person-row::before{content:'';position:absolute;inset-inline-start:-23px;top:24px;width:12px;height:12px;border-radius:50%;background:var(--paper);border:3px solid var(--gold);}
+  .tree-wrap .children-indent>.person-row.f::before{border-color:#F0A3C4;}
+  .tree-wrap .avatar{width:44px;height:44px;}
+  .tree-wrap .person-card.root .avatar{width:54px;height:54px;}
+  .spouse-line .sp-count{color:var(--gold);font-weight:800;}
+  .xbtn{flex:0 0 auto;display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:10px;font:800 12px inherit;font-family:inherit;color:var(--ink-soft);background:transparent;border:1px solid var(--line);cursor:pointer;}
+  .xbtn b{color:var(--gold);font-size:13px;}
+  .xbtn svg{transition:transform .2s;}
+  .xbtn.on{border-color:var(--gold);color:var(--gold);}
+  .xbtn.on svg{transform:rotate(180deg);}
+  :root[data-theme="light"] .tree-wrap .children-indent{border-inline-start-color:#CFC4AE;background:#F1ECE1;}
+  :root[data-theme="light"] .tree-wrap .children-indent .children-indent{background:#EAE2D2;}
+  :root[data-theme="light"] .tree-wrap .children-indent .children-indent .children-indent{background:#E2D8C4;}
+  :root[data-theme="light"] .tree-wrap .children-indent .children-indent .children-indent .children-indent{background:#DACFB8;}
+  :root[data-theme="light"] .tree-wrap .children-indent>.person-row.f::before{border-color:#D46A9A;}
   .ts-btn{min-width:34px;padding:0 8px;font-size:13px;}
   .icon-btn:disabled{opacity:.35;cursor:default;}
   .login-lang #loginThemeBtn{padding:6px 10px;}
@@ -1045,7 +1066,7 @@ function clampCrop(){ cropState.tx = Math.min(0, Math.max(CROP_VIEWPORT - cropSt
 /* =====================================================================
    LOGIN
    ===================================================================== */
-const APP_VERSION = 'v20';
+const APP_VERSION = 'v21';
 let loginMode = 'in', loginBusy = false;
 function renderLogin(){
   const up = loginMode === 'up';
@@ -1270,6 +1291,7 @@ function permNotice(){
   return `<b>👁</b> ${esc(L('يمكنك التصفح وتعديل بياناتك الشخصية، و«اقتراح تصحيح» لأي فرد ليراجعه المشرف.', 'You can browse, edit your own details, and “suggest a correction” for anyone for an admin to review.'))}`;
 }
 function relCached(ctx, id){ const me = currentUser.personId; if(!P(me)) return null; if(!ctx.relCache.has(id)) ctx.relCache.set(id, relationText(me, id)); return ctx.relCache.get(id); }
+const XCHEV = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>';
 function renderNode(id, ctx){
   const wrap = document.createElement('div'); wrap.className = 'person-row';
   if(ctx.visited.has(id)){
@@ -1278,13 +1300,14 @@ function renderNode(id, ctx){
   }
   ctx.visited.add(id);
   const p = P(id), kids = childrenOf(id).length, rel = relCached(ctx, id), isRoot = id === treeState.rootId, open = isOpen(id);
-  wrap.innerHTML = `<div class="person-card ${isRoot ? 'root' : ''}"><button class="av-btn" data-open="${esc(id)}" aria-label="${esc(L('الملف الشخصي', 'Profile'))}">${avatarHtml(p)}</button><button class="name-btn" ${isRoot ? `data-open="${esc(id)}"` : `data-act="drill" data-arg="${esc(id)}"`}><span class="p-name">${esc(name(id))}</span><span class="p-meta">${statusPill(p)}<span>${esc(yearsLabel(p))}</span>${rel ? `<span class="rel-mini">${esc(rel)}</span>` : ''}${canEdit(id) === 'full' ? '<span class="admin-badge">✎</span>' : ''}</span></button>${kids && !isRoot ? `<button class="chev ${open ? 'on' : ''}" data-toggle="${esc(id)}" aria-expanded="${open}" aria-label="${esc(L('عرض الأبناء', 'Show children'))}">${open ? '▴' : '▾'} ${kids}</button>` : ''}</div>`;
+  if(isF(id)) wrap.classList.add('f');
+  wrap.innerHTML = `<div class="person-card ${isRoot ? 'root' : ''}"><button class="av-btn" data-open="${esc(id)}" aria-label="${esc(L('الملف الشخصي', 'Profile'))}">${avatarHtml(p)}</button><button class="name-btn" ${isRoot ? `data-open="${esc(id)}"` : `data-act="drill" data-arg="${esc(id)}"`}><span class="p-name">${esc(name(id))}</span><span class="p-meta">${statusPill(p)}<span>${esc(yearsLabel(p))}</span>${rel ? `<span class="rel-mini">${esc(rel)}</span>` : ''}</span></button>${kids && !isRoot ? `<button class="xbtn ${open ? 'on' : ''}" data-toggle="${esc(id)}" aria-expanded="${open}" aria-label="${esc(open ? L('إخفاء الأبناء', 'Hide children') : L('عرض الأبناء', 'Show children'))}"><b>${kids}</b>${XCHEV}</button>` : ''}</div>`;
   if(!open) return wrap;
   for(const u of unionsOf(id)){
     const sp = u.partners.find(x => x !== id), ks = childrenOfUnion(u.id);
     if(!P(sp) && !ks.length) continue;
     const block = document.createElement('div'); block.className = 'union-block';
-    if(P(sp)) block.insertAdjacentHTML('beforeend', `<button class="spouse-line" data-open="${esc(sp)}">💍 <span class="muted">${esc(isF(sp) ? L('الزوجة:', 'Wife:') : L('الزوج:', 'Husband:'))}</span> <b>${esc(name(sp))}</b></button>`);
+    if(P(sp)) block.insertAdjacentHTML('beforeend', `<button class="spouse-line" data-open="${esc(sp)}">💍 <span class="muted">${esc(isF(sp) ? L('الزوجة:', 'Wife:') : L('الزوج:', 'Husband:'))}</span> <b>${esc(name(sp))}</b>${ks.length ? `<span class="sp-count"> · ${ks.length} ${esc(L('أبناء', 'children'))}</span>` : ''}</button>`);
     if(ks.length > 1 && !ctx.unions.has(u.id) && canReorder(u.id)) block.insertAdjacentHTML('beforeend', `<button class="ro-chip" data-act="reorderKids" data-arg="${esc(u.id)}">⇅ ${esc(L('ترتيب الأبناء', 'Reorder children'))}</button>`);
     if(ks.length){
       if(ctx.unions.has(u.id)) block.insertAdjacentHTML('beforeend', `<div class="muted small">${esc(L('أبناء هذا الزواج معروضون في موضع آخر', 'Children of this marriage are shown elsewhere'))}</div>`);
