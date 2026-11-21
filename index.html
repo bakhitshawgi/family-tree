@@ -721,6 +721,8 @@ function describeRel(ca, cb){
   if(da === 1 && db === 1){
     const sh = parentsOf(a).filter(x => parentsOf(b).includes(x));
     if(sh.length >= 2) return L(f ? 'أختك الشقيقة' : 'أخوك الشقيق', f ? 'your sister' : 'your brother');
+    /* same recorded parents' marriage but only one parent known: siblings, without claiming full or half */
+    if(P(a) && P(b) && P(a).parentUnion && P(a).parentUnion === P(b).parentUnion) return L(f ? 'أختك' : 'أخوك', f ? 'your sister' : 'your brother');
     const viaM = isF(sh[0]);
     return L(`${f ? 'أختك' : 'أخوك'} ${viaM ? 'لأم' : 'لأب'}`, `your ${viaM ? 'maternal' : 'paternal'} half-${f ? 'sister' : 'brother'}`);
   }
@@ -1034,7 +1036,7 @@ function clampCrop(){ cropState.tx = Math.min(0, Math.max(CROP_VIEWPORT - cropSt
 /* =====================================================================
    LOGIN
    ===================================================================== */
-const APP_VERSION = 'v15';
+const APP_VERSION = 'v16';
 let loginMode = 'in', loginBusy = false;
 function renderLogin(){
   const up = loginMode === 'up';
@@ -1849,6 +1851,9 @@ function buildImportPlan(text){
   for(let changed = true; changed;){
     changed = false;
     for(const u of d.unions){
+      /* a parent can be found through an already-matched child */
+      const kidParents = (u.children || []).filter(k => ids[k]).flatMap(k => parentsOf(ids[k]));
+      if(kidParents.length) for(const k of u.partners || []){ const x = byKey[k]; if(!x || ids[k]) continue; const m = pick(kidParents, x); if(m){ take(x, m); changed = true; } }
       const known = (u.partners || []).filter(k => ids[k]).map(k => ids[k]);
       if(!known.length) continue;
       let kidPool = childrenOf(known[0]); if(known.length > 1) kidPool = kidPool.filter(c => childrenOf(known[1]).includes(c));
@@ -1862,7 +1867,10 @@ function buildImportPlan(text){
   for(const u of d.unions){
     const parts = (u.partners || []).map(k => { if(!byKey[k]) throw L('شريك غير معروف: ', 'Unknown partner: ') + k; return ids[k]; });
     if(parts.length < 1 || parts.length > 2 || new Set(parts).size !== parts.length) throw L('زواج غير صالح', 'Invalid marriage');
-    const same = Object.values(DB.unions).find(e => e.partners.length === parts.length && parts.every(p => e.partners.includes(p)));
+    let same = Object.values(DB.unions).find(e => e.partners.length === parts.length && parts.every(p => e.partners.includes(p)));
+    /* only one parent given: join the existing marriage of that parent which already holds one of these children,
+       so the new children become full siblings instead of half-siblings */
+    if(!same && parts.length === 1){ const via = (u.children || []).map(k => ids[k] && P(ids[k]) && P(ids[k]).parentUnion).find(pu => pu && DB.unions[pu] && DB.unions[pu].partners.includes(parts[0])); if(via) same = DB.unions[via]; }
     const uidv = same ? same.id : uid('u_'), kids = [];
     (u.children || []).forEach((k, i) => {
       if(!byKey[k]) throw L('ابن غير معروف: ', 'Unknown child: ') + k;
