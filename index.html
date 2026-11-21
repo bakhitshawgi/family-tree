@@ -462,7 +462,7 @@
 
 <div class="modal-mini" id="confirmModal">
   <div class="modal-mini-card">
-    <p id="confirmText" style="margin:0 0 16px;line-height:1.7;font-weight:700;"></p>
+    <p id="confirmText" style="margin:0 0 16px;line-height:1.7;font-weight:700;white-space:pre-line;"></p>
     <div class="row2"><button class="full-btn ghost" id="confirmNo"></button><button class="full-btn" id="confirmYes"></button></div>
   </div>
 </div>
@@ -1036,7 +1036,7 @@ function clampCrop(){ cropState.tx = Math.min(0, Math.max(CROP_VIEWPORT - cropSt
 /* =====================================================================
    LOGIN
    ===================================================================== */
-const APP_VERSION = 'v16';
+const APP_VERSION = 'v17';
 let loginMode = 'in', loginBusy = false;
 function renderLogin(){
   const up = loginMode === 'up';
@@ -1370,6 +1370,7 @@ function openProfile(id){
   if(cap === 'full' || canAddUnder(id)) acts.push(btn('addSpouse', id, '💍 ' + esc(L('إضافة زواج', 'Add marriage')), 'ghost'));
   if(cap !== 'full') acts.push(btn('suggest', id, '📝 ' + esc(L('اقتراح تصحيح', 'Suggest a correction')), 'ghost'));
   if(cap === 'full' && p.parentUnion && childrenOfUnion(p.parentUnion).length > 1){ acts.push(btn('moveSib', id + '|-1', '↑ ' + esc(L('تقديم في ترتيب الإخوة', 'Move earlier')), 'ghost')); acts.push(btn('moveSib', id + '|1', '↓ ' + esc(L('تأخير في ترتيب الإخوة', 'Move later')), 'ghost')); }
+  if(cap === 'full') dupUnionsOf(id).forEach(d => acts.unshift(`<button class="sheet-btn edit" style="flex-basis:100%" data-act="mergeUnion" data-arg="${esc(d.target + '|' + d.source)}">🔗 ${esc(L('دمج زواج مكرر: ', 'Merge duplicate marriage: ') + unionName(DB.unions[d.target]))}</button>`));
   acts.push(btn('pickRoot', id, '🌳 ' + esc(L('عرض الشجرة من هنا', 'View tree from here')), 'ghost'));
   if(cap === 'full' && (currentUser.super || !linkedToMember(id))) acts.push(btn('deletePerson', id, '🗑 ' + esc(L('حذف', 'Delete')), 'danger'));
   h += `<div class="action-grid">${acts.join('')}</div>`;
@@ -1533,6 +1534,31 @@ ACT.saveSpouse = pid => {
     DB.unions[u.id] = u;
     log('union', pid, name(other)); closeOv(); commit(); openProfile(pid);
   }catch(e){ formError(typeof e === 'string' ? e : e.message); }
+};
+/* ---------- duplicate marriages: the same couple recorded twice, or one parent recorded alone next to a full couple ---------- */
+function dupUnionsOf(pid){
+  const out = [];
+  for(const u of unionsOf(pid)) for(const o of Object.values(DB.unions)){
+    if(o.id === u.id || o.partners.length > u.partners.length || !o.partners.every(x => u.partners.includes(x))) continue;
+    if(o.partners.length === u.partners.length && o.id < u.id) continue;          /* identical couple: list once */
+    if(!out.some(d => d.target === u.id && d.source === o.id)) out.push({ target:u.id, source:o.id });
+  }
+  return out;
+}
+ACT.mergeUnion = arg => {
+  const [tid, sid] = arg.split('|'), t = DB.unions[tid], so = DB.unions[sid];
+  if(!t || !so || !t.partners.some(x => canEdit(x) === 'full')) return toast(DENIED());
+  const sk = childrenOfUnion(sid), tk = childrenOfUnion(tid);
+  confirmBox(L(`دمج الزواجين في زواج واحد «${unionName(t)}»؟\nسيصبح الأبناء (${sk.length + tk.length}) كلهم أبناء ${unionName(t)}، ويُحذف السجل المكرر.`,
+               `Merge into one marriage “${unionName(t)}”?\nAll ${sk.length + tk.length} children become children of ${unionName(t)} and the duplicate record is removed.`), () => {
+    beginChange();
+    [sk, tk].sort((a, b) => b.length - a.length).flat().forEach((c, i) => { c.parentUnion = tid; c.order = i; });
+    if(!t.start && so.start) t.start = so.start;
+    log('unionEdit', t.partners[0], 'merge'); closeOv(); commit();
+    /* delete the emptied duplicate once the children have been moved on the server */
+    setTimeout(() => { chain = chain.then(async () => { if(DB.unions[sid] && !childrenOfUnion(sid).length){ beginChange(); delete DB.unions[sid]; commit(); } }); }, 0);
+    toast(L('تم الدمج ✓', 'Merged ✓')); openProfile(t.partners[0]);
+  }, L('دمج', 'Merge'));
 };
 ACT.editUnion = uidv => {
   const u = DB.unions[uidv]; if(!u || !u.partners.some(x => canEdit(x) === 'full')) return toast(DENIED());
