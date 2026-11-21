@@ -361,8 +361,12 @@
   input::placeholder,textarea::placeholder{color:#8A96AD;}
   header.app-bar .brand{white-space:nowrap;min-width:0;}
   .lang-btn{background:var(--btn);}
-  /* Close (✕) stays visible while a sheet scrolls; it overlaps the content instead of pushing it down. */
-  .close-btn{position:sticky;top:10px;inset-inline-end:auto;display:flex;align-items:center;justify-content:center;margin:-6px 14px -26px auto;margin-inline-start:auto;margin-inline-end:14px;z-index:6;box-shadow:0 2px 10px rgba(0,0,0,0.35);border:1px solid var(--line);}
+  /* Sheet top bar: always visible while the sheet scrolls — Back (start side) and Close (end side). */
+  .sheet-bar{position:sticky;top:0;z-index:6;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 12px;min-height:58px;background:var(--paper);border-bottom:1px solid var(--line);}
+  .sheet-bar .sheet-handle{position:absolute;top:6px;left:50%;transform:translateX(-50%);margin:0;}
+  .sheet-bar .close-btn{position:static;width:40px;height:40px;margin-inline-start:auto;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;background:var(--raised-2);color:var(--ink);border:1.5px solid var(--line);box-shadow:none;}
+  .sheet-back{background:var(--raised-2);color:var(--ink);border:1.5px solid var(--line);border-radius:999px;height:40px;padding:0 16px;font-weight:800;font-size:14px;cursor:pointer;white-space:nowrap;max-width:65%;overflow:hidden;text-overflow:ellipsis;}
+  .sheet-header{padding-top:14px;}
   .ts-btn{min-width:34px;padding:0 8px;font-size:13px;}
   .icon-btn:disabled{opacity:.35;cursor:default;}
   .login-lang #loginThemeBtn{padding:6px 10px;}
@@ -427,7 +431,7 @@
   <nav class="bottom-nav" id="bottomNav"></nav>
 </div>
 
-<div class="overlay" id="ov"><div class="sheet" id="ovSheet"><div class="sheet-handle"></div><button class="close-btn" data-act="closeOv" aria-label="close">✕</button><div id="ovBody"></div></div></div>
+<div class="overlay" id="ov"><div class="sheet" id="ovSheet"><div class="sheet-bar"><button class="sheet-back hidden" id="ovBack" data-act="ovBack"></button><div class="sheet-handle"></div><button class="close-btn" id="ovClose" data-act="closeOv" aria-label="close">✕</button></div><div id="ovBody"></div></div></div>
 
 <div class="modal-mini" id="cropModal">
   <div class="modal-mini-card" style="max-width:320px;text-align:center;">
@@ -797,8 +801,34 @@ const ACTION_LABEL = () => ({ add:L('أضاف', 'added'), edit:L('عدّل', 'ed
 /* ---------- UI primitives ---------- */
 let toastTimer = null;
 function toast(msg, ms){ const el = $('toast'); el.textContent = msg; el.style.display = 'block'; clearTimeout(toastTimer); toastTimer = setTimeout(() => el.style.display = 'none', ms || 2600); }
-function openOv(html, after){ $('ovBody').innerHTML = html; $('ov').classList.add('open'); $('ovSheet').scrollTop = 0; if(after) after(); }
-function closeOv(){ $('ov').classList.remove('open'); }
+/* Sheets keep a back stack: opening a sheet from a sheet that can be reopened (a profile) lets you go back to it.
+   One browser-history entry is held while any sheet is open, so the phone's back swipe goes back / closes the sheet
+   instead of leaving the app. */
+const ovNav = { stack:[], reopen:null, back:false, hist:false, ignorePop:false };
+const ovIsOpen = () => $('ov').classList.contains('open');
+function ovBackLabel(){ const b = $('ovBack'), top = ovNav.stack[ovNav.stack.length - 1]; b.classList.toggle('hidden', !top); if(top) b.textContent = L('→ رجوع', '← Back') + (top.label ? ' · ' + top.label : ''); $('ovClose').setAttribute('aria-label', L('إغلاق', 'Close')); }
+function openOv(html, after, reopen){
+  if(ovIsOpen() && !ovNav.back && ovNav.reopen) ovNav.stack.push(ovNav.reopen);
+  ovNav.back = false; ovNav.reopen = reopen || null;
+  $('ovBody').innerHTML = html; $('ov').classList.add('open'); $('ovSheet').scrollTop = 0; ovBackLabel();
+  if(!ovNav.hist){ try{ history.pushState({ ftSheet:1 }, ''); ovNav.hist = true; }catch(e){} }
+  if(after) after();
+}
+function closeOv(fromHistory){
+  if(!ovIsOpen() && !fromHistory) return;
+  $('ov').classList.remove('open'); ovNav.stack = []; ovNav.reopen = null;
+  if(fromHistory === true){ ovNav.hist = false; return; }
+  /* drop our history entry — unless another sheet opens right away (e.g. save → open the profile) */
+  setTimeout(() => { if(!ovIsOpen() && ovNav.hist){ ovNav.hist = false; ovNav.ignorePop = true; history.back(); } }, 0);
+}
+function ovGoBack(){ const prev = ovNav.stack.pop(); if(!prev){ closeOv(); return; } ovNav.back = true; prev.fn(); }
+window.addEventListener('popstate', () => {
+  if(ovNav.ignorePop){ ovNav.ignorePop = false; return; }
+  if(!ovIsOpen()){ ovNav.hist = false; return; }
+  ovNav.hist = false;
+  if(ovNav.stack.length){ ovGoBack(); if(!ovNav.hist){ try{ history.pushState({ ftSheet:1 }, ''); ovNav.hist = true; }catch(e){} } }
+  else closeOv(true);
+});
 let confirmCb = null;
 function confirmBox(text, yes, yesLabel){ $('confirmText').textContent = text; $('confirmYes').textContent = yesLabel || L('تأكيد', 'Confirm'); $('confirmNo').textContent = L('إلغاء', 'Cancel'); confirmCb = yes; $('confirmModal').classList.add('open'); }
 $('confirmNo').onclick = () => { $('confirmModal').classList.remove('open'); confirmCb = null; };
@@ -928,7 +958,7 @@ function clampCrop(){ cropState.tx = Math.min(0, Math.max(CROP_VIEWPORT - cropSt
 /* =====================================================================
    LOGIN
    ===================================================================== */
-const APP_VERSION = 'v10';
+const APP_VERSION = 'v11';
 let loginMode = 'in', loginBusy = false;
 function renderLogin(){
   const up = loginMode === 'up';
@@ -1031,6 +1061,7 @@ function renderNav(){
 }
 ACT.tab = t => { activeTab = t; window.scrollTo(0, 0); renderAll(); };
 ACT.closeOv = () => closeOv();
+ACT.ovBack = () => ovGoBack();
 ACT.undo = () => {
   if(!undoStack.length) return;
   confirmBox(L('التراجع عن آخر تعديل قمت به؟', 'Undo the last change?'), () => {
@@ -1250,7 +1281,7 @@ function openProfile(id){
     const hist = DB.audit.filter(a => a.pid === id).slice(0, 15);
     if(hist.length) h += `<details class="hist"><summary>${esc(L('سجل التعديلات', 'Change history'))} (${hist.length})</summary>${hist.map(auditRow).join('')}</details>`;
   }
-  openOv(h);
+  openOv(h, null, { fn:() => openProfile(id), label:name(id) });
 }
 function auditRow(a){ return `<div class="audit-row"><b>${esc(userDisplay(a.user))}</b> ${esc(ACTION_LABEL()[a.action] || a.action)} ${a.pid && P(a.pid) ? linkBtn(a.pid) : esc(a.pname || '')}${a.detail ? ` <span class="muted">— ${esc(a.detail)}</span>` : ''}<br><span class="muted small">${esc(fmtAgo(a.ts))}</span></div>`; }
 
