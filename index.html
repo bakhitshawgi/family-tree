@@ -381,6 +381,15 @@
   .greet-h{font-size:12px;color:#D6CFBF;margin-top:1px;}
   .greet-time{font-size:24px;font-weight:800;color:#FFE08A;white-space:nowrap;}
   @media (max-width:360px){ .greet{padding:12px;gap:10px;} .greet-ico svg{width:46px;height:46px;} .greet-time{font-size:20px;} }
+  .ro-chip{display:inline-flex;align-items:center;gap:4px;margin:2px 0 6px;background:transparent;border:1.5px dashed var(--line);color:var(--gold);border-radius:999px;padding:4px 12px;font-size:12px;font-weight:800;cursor:pointer;}
+  .ro-chip:hover{border-color:var(--gold);}
+  .ro-list{list-style:none;margin:0;padding:0;}
+  .ro-item{display:flex;align-items:center;gap:10px;background:var(--paper-raised);border:1px solid var(--line);border-radius:14px;padding:8px 10px;margin:0 0 8px;user-select:none;-webkit-user-select:none;position:relative;}
+  .ro-item.dragging{z-index:5;border-color:var(--gold);box-shadow:0 10px 24px rgba(0,0,0,.35);background:var(--raised-2);}
+  .ro-n{flex:0 0 22px;text-align:center;font-weight:800;color:var(--gold);font-size:13px;}
+  .ro-name{flex:1;min-width:0;font-weight:700;font-size:14.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .ro-h{flex:0 0 auto;width:44px;height:40px;display:flex;align-items:center;justify-content:center;font-size:22px;color:var(--ink-soft);cursor:grab;touch-action:none;border-radius:10px;background:var(--raised-2);}
+  .ro-item.dragging .ro-h{cursor:grabbing;color:var(--gold);}
   .ts-btn{min-width:34px;padding:0 8px;font-size:13px;}
   .icon-btn:disabled{opacity:.35;cursor:default;}
   .login-lang #loginThemeBtn{padding:6px 10px;}
@@ -1036,7 +1045,7 @@ function clampCrop(){ cropState.tx = Math.min(0, Math.max(CROP_VIEWPORT - cropSt
 /* =====================================================================
    LOGIN
    ===================================================================== */
-const APP_VERSION = 'v18';
+const APP_VERSION = 'v19';
 let loginMode = 'in', loginBusy = false;
 function renderLogin(){
   const up = loginMode === 'up';
@@ -1276,6 +1285,7 @@ function renderNode(id, ctx){
     if(!P(sp) && !ks.length) continue;
     const block = document.createElement('div'); block.className = 'union-block';
     if(P(sp)) block.insertAdjacentHTML('beforeend', `<button class="spouse-line" data-open="${esc(sp)}">💍 <span class="muted">${esc(isF(sp) ? L('الزوجة:', 'Wife:') : L('الزوج:', 'Husband:'))}</span> <b>${esc(name(sp))}</b></button>`);
+    if(ks.length > 1 && !ctx.unions.has(u.id) && canReorder(u.id)) block.insertAdjacentHTML('beforeend', `<button class="ro-chip" data-act="reorderKids" data-arg="${esc(u.id)}">⇅ ${esc(L('ترتيب الأبناء', 'Reorder children'))}</button>`);
     if(ks.length){
       if(ctx.unions.has(u.id)) block.insertAdjacentHTML('beforeend', `<div class="muted small">${esc(L('أبناء هذا الزواج معروضون في موضع آخر', 'Children of this marriage are shown elsewhere'))}</div>`);
       else { ctx.unions.add(u.id); const ind = document.createElement('div'); ind.className = 'children-indent'; ks.forEach(k => ind.appendChild(renderNode(k.id, ctx))); block.appendChild(ind); }
@@ -1359,7 +1369,8 @@ function openProfile(id){
   const us = unionsOf(id).filter(u => childrenOfUnion(u.id).length);
   if(us.length){
     h += `<div class="detail-section"><p class="section-title">${esc(L('الأبناء', 'Children'))}</p>`;
-    us.forEach(u => { const sp = u.partners.find(x => x !== id); if(us.length > 1 || !P(sp)) h += `<p class="small muted" style="margin:6px 0 4px">${esc(P(sp) ? L('من ', 'with ') + name(sp) : L('الطرف الآخر غير مسجل', 'other parent not recorded'))}</p>`; h += `<div class="children-chips">${childrenOfUnion(u.id).map(c => `<button class="child-chip" data-open="${esc(c.id)}">${esc(name(c.id))}</button>`).join('')}</div>`; });
+    us.forEach(u => { const sp = u.partners.find(x => x !== id); if(us.length > 1 || !P(sp)) h += `<p class="small muted" style="margin:6px 0 4px">${esc(P(sp) ? L('من ', 'with ') + name(sp) : L('الطرف الآخر غير مسجل', 'other parent not recorded'))}</p>`;
+      if(childrenOfUnion(u.id).length > 1 && canReorder(u.id)) h += `<button class="ro-chip" data-act="reorderKids" data-arg="${esc(u.id)}">⇅ ${esc(L('ترتيب الأبناء', 'Reorder children'))}</button>`; h += `<div class="children-chips">${childrenOfUnion(u.id).map(c => `<button class="child-chip" data-open="${esc(c.id)}">${esc(name(c.id))}</button>`).join('')}</div>`; });
     h += `</div>`;
   }
   const btn = (act, arg, label, cls) => `<button class="sheet-btn ${cls}" data-act="${act}" data-arg="${esc(arg)}">${label}</button>`;
@@ -1559,6 +1570,47 @@ ACT.mergeUnion = arg => {
     setTimeout(() => { chain = chain.then(async () => { if(DB.unions[sid] && !childrenOfUnion(sid).length){ beginChange(); delete DB.unions[sid]; commit(); } }); }, 0);
     toast(L('تم الدمج ✓', 'Merged ✓')); openProfile(t.partners[0]);
   }, L('دمج', 'Merge'));
+};
+/* ---------- reorder children by drag and drop (mouse or touch, via the ⠿ handle) ---------- */
+function canReorder(uid){ const ks = childrenOfUnion(uid); return ks.length > 1 && ks.every(k => canEdit(k.id) === 'full'); }
+ACT.reorderKids = uid => {
+  const u = DB.unions[uid]; if(!u || !canReorder(uid)) return toast(DENIED());
+  const ks = childrenOfUnion(uid);
+  openOv(`<div class="ov-pad"><h2 class="form-title">${esc(L('ترتيب أبناء ', 'Order of children: ') + unionName(u))}</h2>
+    <p class="hint" style="margin:-6px 0 12px">${esc(L('اسحب المقبض ⠿ للأعلى أو الأسفل (بالماوس أو بإصبعك)، ثم اضغط «حفظ الترتيب». الأكبر في الأعلى.', 'Drag the ⠿ handle up or down (mouse or finger), then tap “Save order”. Eldest at the top.'))}</p>
+    <ol class="ro-list" id="ro_list">${ks.map(k => `<li class="ro-item" data-id="${esc(k.id)}"><span class="ro-n"></span>${avatarHtml(k, 'sm')}<span class="ro-name">${esc(name(k.id))}</span><span class="ro-h" aria-label="${esc(L('اسحب', 'Drag'))}">⠿</span></li>`).join('')}</ol>
+    <div class="row2" style="margin-top:12px"><button class="full-btn ghost" data-act="ovBack">${esc(L('إلغاء', 'Cancel'))}</button><button class="full-btn" data-act="saveKidOrder" data-arg="${esc(uid)}">${esc(L('حفظ الترتيب', 'Save order'))}</button></div></div>`, wireReorder);
+};
+function wireReorder(){
+  const list = $('ro_list'), sheet = $('ovSheet'); if(!list) return;
+  const number = () => [...list.children].forEach((li, i) => li.querySelector('.ro-n').textContent = i + 1);
+  number();
+  let drag = null;
+  list.addEventListener('pointerdown', e => {
+    const h = e.target.closest('.ro-h'); if(!h) return;
+    e.preventDefault(); const li = h.closest('.ro-item');
+    drag = { li, startY:e.clientY, offset:0, id:e.pointerId }; li.classList.add('dragging'); h.setPointerCapture(e.pointerId);
+  });
+  list.addEventListener('pointermove', e => {
+    if(!drag || e.pointerId !== drag.id) return;
+    const sr = sheet.getBoundingClientRect();
+    if(e.clientY < sr.top + 90) sheet.scrollTop -= 10; else if(e.clientY > sr.bottom - 50) sheet.scrollTop += 10;
+    let dy = e.clientY - drag.startY; const li = drag.li;
+    const prev = li.previousElementSibling, next = li.nextElementSibling;
+    if(next && dy > next.offsetHeight / 2){ list.insertBefore(next, li); drag.startY += next.offsetHeight; dy = e.clientY - drag.startY; number(); }
+    else if(prev && -dy > prev.offsetHeight / 2){ list.insertBefore(prev, li.nextSibling);   /* move the neighbour, never the dragged item (keeps the pointer capture) */
+      drag.startY -= prev.offsetHeight; dy = e.clientY - drag.startY; number(); }
+    li.style.transform = `translateY(${dy}px)`;
+  });
+  const end = e => { if(!drag || (e && e.pointerId !== drag.id)) return; drag.li.style.transform = ''; drag.li.classList.remove('dragging'); drag = null; };
+  list.addEventListener('pointerup', end); list.addEventListener('pointercancel', end); list.addEventListener('lostpointercapture', end);
+}
+ACT.saveKidOrder = uid => {
+  if(!canReorder(uid)) return toast(DENIED());
+  const ids = [...document.querySelectorAll('#ro_list .ro-item')].map(li => li.dataset.id);
+  if(ids.every((id, i) => P(id).order === i)){ ovGoBack(); return; }
+  beginChange(); ids.forEach((id, i) => { P(id).order = i; }); log('reorder', ids[0], '');
+  commit(); toast(L('تم حفظ الترتيب ✓', 'Order saved ✓')); ovGoBack();
 };
 ACT.editUnion = uidv => {
   const u = DB.unions[uidv]; if(!u || !u.partners.some(x => canEdit(x) === 'full')) return toast(DENIED());
