@@ -1066,7 +1066,7 @@ function clampCrop(){ cropState.tx = Math.min(0, Math.max(CROP_VIEWPORT - cropSt
 /* =====================================================================
    LOGIN
    ===================================================================== */
-const APP_VERSION = 'v21';
+const APP_VERSION = 'v22';
 let loginMode = 'in', loginBusy = false;
 function renderLogin(){
   const up = loginMode === 'up';
@@ -1984,13 +1984,18 @@ function buildImportPlan(text){
       if(ex && ex.parentUnion && ex.parentUnion !== uidv){
         const cur = DB.unions[ex.parentUnion];
         /* recorded under one parent alone (or a duplicate of the same couple) and the file names both parents: move into the couple's marriage */
-        if(cur && cur.partners.length <= parts.length && cur.partners.every(x => parts.includes(x))){ moves.push([cid, cur.id]); kids.push([cid, i]); return; }
+        if(cur && cur.partners.length <= parts.length && cur.partners.every(x => parts.includes(x))){ moves.push([cid, cur.id, true]); kids.push([cid, i]); return; }
+        /* the file explicitly says these are the real parents ("reassign": true): move the child from the parents recorded now */
+        if(u.reassign === true){ moves.push([cid, ex.parentUnion, false]); kids.push([cid, i]); return; }
         problems.push(L(`«${name(cid)}» مسجل بوالدين آخرين في الشجرة — تُرك كما هو`, `“${name(cid)}” already has other parents in the tree — left unchanged`)); return;
       }
       if(ex && ex.parentUnion === uidv) return;
       kids.push([cid, i]);
     });
-    unions.push({ id:uidv, isNew:!same, partners:parts, kids });
+    const st = u.status == null ? null : String(u.status);
+    if(st !== null && !['married', 'divorced', 'widowed'].includes(st)) throw L('حالة زواج غير صحيحة: ', 'Invalid marriage status: ') + st;
+    const setStatus = st && (!same || same.status !== st) ? st : null;
+    unions.push({ id:uidv, isNew:!same, partners:parts, kids, setStatus });
   }
   const fillEn = matched.filter(([x, id]) => String(x.name_en || '').trim() && !String(P(id).name_en || '').trim()).map(([x, id]) => [id, String(x.name_en).trim()]);
   return { byKey, ids, matched, fresh, unions, problems, moves, fillEn };
@@ -2002,8 +2007,9 @@ ACT.importPreview = () => {
     $('imp_preview').innerHTML = `<div class="info-card"><h3>${esc(L('المعاينة', 'Preview'))}</h3>
       <p class="small">${esc(L(`${pl.fresh.length} شخصًا جديدًا · ${pl.matched.length} موجودون مسبقًا · ${nu} زواجًا جديدًا · ${links} رابط أبوة`, `${pl.fresh.length} new people · ${pl.matched.length} already in the tree · ${nu} new marriages · ${links} parent links`))}</p>
       ${pl.matched.length ? `<p class="section-title">${esc(L('سيُربطون بالموجودين (لن يُكرَّروا)', 'Linked to existing (not duplicated)'))}</p><p class="small">${pl.matched.map(([x, id]) => esc(x.name_ar) + ' ← ' + esc(name(id))).join('<br>')}</p>` : ''}
+      ${pl.unions.some(u => u.setStatus) ? `<p class="section-title">💍 ${esc(L('حالة الزواج', 'Marriage status'))}</p><p class="small">${pl.unions.filter(u => u.setStatus).map(u => esc(u.partners.map(id => P(id) ? name(id) : (Object.values(pl.byKey).find(x => pl.ids[x.key] === id) || {}).name_ar).join(' + ')) + ' — ' + esc(unionStatus({ status:u.setStatus }))).join('<br>')}</p>` : ''}
       ${pl.fillEn.length ? `<p class="section-title">🔤 ${esc(L('سيُضاف الاسم الإنجليزي (كان فارغًا)', 'English name added (was empty)'))}</p><p class="small" dir="ltr" style="text-align:start">${pl.fillEn.map(([id, en]) => esc(en)).join(' · ')}</p>` : ''}
-      ${pl.moves.length ? `<p class="section-title">🔗 ${esc(L('سيُنقلون إلى زواج والديهم الكامل', 'Moved into their parents’ full marriage'))}</p><p class="small">${pl.moves.map(([cid]) => esc(name(cid))).join('، ')}</p>` : ''}
+      ${pl.moves.length ? `<p class="section-title">🔗 ${esc(L('سيُنقلون إلى زواج والديهم الكامل', 'Moved into their parents’ full marriage'))}</p><p class="small">${pl.moves.map(([cid, from, sub]) => esc(name(cid)) + (sub ? '' : ` <span class="muted">(${esc(L('من ', 'from ') + unionName(DB.unions[from]))})</span>`)).join('، ')}</p>` : ''}
       ${pl.problems.length ? `<p class="section-title">⚠️ ${esc(L('تنبيهات', 'Warnings'))}</p><p class="small">${pl.problems.map(esc).join('<br>')}</p>` : ''}
       <p class="section-title">${esc(L('الجدد', 'New people'))}</p><p class="small">${pl.fresh.map(x => esc(x.name_ar) + (x.name_en ? ` <span class="muted">(${esc(x.name_en)})</span>` : '')).join('، ')}</p>
       <button class="full-btn" data-act="importApply">${esc(L('استيراد وحفظ', 'Import & save'))}</button></div>`;
@@ -2021,10 +2027,11 @@ ACT.importApply = () => {
         statusUnknown:!!x.status_unknown && living, birth:yd(x.birth_y), death:living ? null : yd(x.death_y), phone:RX.phone.test(x.phone || '') ? x.phone : '', consent:false });
     });
     pl.unions.forEach(u => {
-      if(u.isNew) DB.unions[u.id] = { id:u.id, partners:u.partners.slice(), status:'married', start:null, end:null };
+      if(u.isNew) DB.unions[u.id] = { id:u.id, partners:u.partners.slice(), status:u.setStatus || 'married', start:null, end:null };
+      else if(u.setStatus && DB.unions[u.id]){ DB.unions[u.id].status = u.setStatus; if(u.setStatus === 'married') DB.unions[u.id].end = null; }
       u.kids.forEach(([cid, i]) => { const p = P(cid); p.parentUnion = u.id; p.order = i; });
     });
-    const emptied = [...new Set(pl.moves.map(m => m[1]))];
+    const emptied = [...new Set(pl.moves.filter(m => m[2]).map(m => m[1]))];
     importPlan = null; closeOv(); commit(); toast(L('تم الاستيراد ✓', 'Imported ✓'), 3500);
     if(emptied.length) setTimeout(() => { chain = chain.then(async () => { const gone = emptied.filter(id => DB.unions[id] && !childrenOfUnion(id).length); if(gone.length){ beginChange(); gone.forEach(id => delete DB.unions[id]); commit(); } }); }, 0);
   }, L('استيراد', 'Import'));
