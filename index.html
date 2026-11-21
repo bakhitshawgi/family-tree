@@ -1036,7 +1036,7 @@ function clampCrop(){ cropState.tx = Math.min(0, Math.max(CROP_VIEWPORT - cropSt
 /* =====================================================================
    LOGIN
    ===================================================================== */
-const APP_VERSION = 'v17';
+const APP_VERSION = 'v18';
 let loginMode = 'in', loginBusy = false;
 function renderLogin(){
   const up = loginMode === 'up';
@@ -1882,14 +1882,15 @@ function buildImportPlan(text){
       if(kidParents.length) for(const k of u.partners || []){ const x = byKey[k]; if(!x || ids[k]) continue; const m = pick(kidParents, x); if(m){ take(x, m); changed = true; } }
       const known = (u.partners || []).filter(k => ids[k]).map(k => ids[k]);
       if(!known.length) continue;
-      let kidPool = childrenOf(known[0]); if(known.length > 1) kidPool = kidPool.filter(c => childrenOf(known[1]).includes(c));
+      /* children of either named parent (some may be recorded under one parent only); first name + gender must still match uniquely */
+      const kidPool = [...new Set(known.flatMap(childrenOf))];
       for(const k of u.children || []){ const x = byKey[k]; if(!x || ids[k]) continue; const m = pick(kidPool, x); if(m){ take(x, m); changed = true; } }
       for(const k of u.partners || []){ const x = byKey[k]; if(!x || ids[k]) continue; const m = pick(known.flatMap(spousesOf), x); if(m){ take(x, m); changed = true; } }
     }
   }
   const matched = [], fresh = [];
   for(const x of d.people){ if(ids[x.key]) matched.push([x, ids[x.key]]); else { ids[x.key] = uid('p_'); fresh.push(x); } }
-  const childSeen = new Set(), unions = [];
+  const childSeen = new Set(), unions = [], moves = [];
   for(const u of d.unions){
     const parts = (u.partners || []).map(k => { if(!byKey[k]) throw L('شريك غير معروف: ', 'Unknown partner: ') + k; return ids[k]; });
     if(parts.length < 1 || parts.length > 2 || new Set(parts).size !== parts.length) throw L('زواج غير صالح', 'Invalid marriage');
@@ -1904,13 +1905,18 @@ function buildImportPlan(text){
       childSeen.add(k);
       const cid = ids[k], ex = P(cid);
       if(parts.includes(cid) || parts.some(p => P(p) && P(cid) && isDescendant(p, cid))) throw L('دورة في النسب عند: ', 'Ancestry loop at: ') + byKey[k].name_ar;
-      if(ex && ex.parentUnion && ex.parentUnion !== uidv){ problems.push(L(`«${name(cid)}» مسجل بوالدين آخرين في الشجرة — تُرك كما هو`, `“${name(cid)}” already has other parents in the tree — left unchanged`)); return; }
+      if(ex && ex.parentUnion && ex.parentUnion !== uidv){
+        const cur = DB.unions[ex.parentUnion];
+        /* recorded under one parent alone (or a duplicate of the same couple) and the file names both parents: move into the couple's marriage */
+        if(cur && cur.partners.length <= parts.length && cur.partners.every(x => parts.includes(x))){ moves.push([cid, cur.id]); kids.push([cid, i]); return; }
+        problems.push(L(`«${name(cid)}» مسجل بوالدين آخرين في الشجرة — تُرك كما هو`, `“${name(cid)}” already has other parents in the tree — left unchanged`)); return;
+      }
       if(ex && ex.parentUnion === uidv) return;
       kids.push([cid, i]);
     });
     unions.push({ id:uidv, isNew:!same, partners:parts, kids });
   }
-  return { byKey, ids, matched, fresh, unions, problems };
+  return { byKey, ids, matched, fresh, unions, problems, moves };
 }
 ACT.importPreview = () => {
   try{
@@ -1919,6 +1925,7 @@ ACT.importPreview = () => {
     $('imp_preview').innerHTML = `<div class="info-card"><h3>${esc(L('المعاينة', 'Preview'))}</h3>
       <p class="small">${esc(L(`${pl.fresh.length} شخصًا جديدًا · ${pl.matched.length} موجودون مسبقًا · ${nu} زواجًا جديدًا · ${links} رابط أبوة`, `${pl.fresh.length} new people · ${pl.matched.length} already in the tree · ${nu} new marriages · ${links} parent links`))}</p>
       ${pl.matched.length ? `<p class="section-title">${esc(L('سيُربطون بالموجودين (لن يُكرَّروا)', 'Linked to existing (not duplicated)'))}</p><p class="small">${pl.matched.map(([x, id]) => esc(x.name_ar) + ' ← ' + esc(name(id))).join('<br>')}</p>` : ''}
+      ${pl.moves.length ? `<p class="section-title">🔗 ${esc(L('سيُنقلون إلى زواج والديهم الكامل', 'Moved into their parents’ full marriage'))}</p><p class="small">${pl.moves.map(([cid]) => esc(name(cid))).join('، ')}</p>` : ''}
       ${pl.problems.length ? `<p class="section-title">⚠️ ${esc(L('تنبيهات', 'Warnings'))}</p><p class="small">${pl.problems.map(esc).join('<br>')}</p>` : ''}
       <p class="section-title">${esc(L('الجدد', 'New people'))}</p><p class="small">${pl.fresh.map(x => esc(x.name_ar) + (x.name_en ? ` <span class="muted">(${esc(x.name_en)})</span>` : '')).join('، ')}</p>
       <button class="full-btn" data-act="importApply">${esc(L('استيراد وحفظ', 'Import & save'))}</button></div>`;
@@ -1938,7 +1945,9 @@ ACT.importApply = () => {
       if(u.isNew) DB.unions[u.id] = { id:u.id, partners:u.partners.slice(), status:'married', start:null, end:null };
       u.kids.forEach(([cid, i]) => { const p = P(cid); p.parentUnion = u.id; p.order = i; });
     });
+    const emptied = [...new Set(pl.moves.map(m => m[1]))];
     importPlan = null; closeOv(); commit(); toast(L('تم الاستيراد ✓', 'Imported ✓'), 3500);
+    if(emptied.length) setTimeout(() => { chain = chain.then(async () => { const gone = emptied.filter(id => DB.unions[id] && !childrenOfUnion(id).length); if(gone.length){ beginChange(); gone.forEach(id => delete DB.unions[id]); commit(); } }); }, 0);
   }, L('استيراد', 'Import'));
 };
 ACT.exportJson = () => { if(mustSuper()) exportView(L('نسخة احتياطية كاملة (JSON)', 'Full backup (JSON)'), 'family-tree-backup.json', JSON.stringify(DB, null, 1), 'application/json'); };
