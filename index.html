@@ -746,7 +746,15 @@ function relationText(me, b){
 /* ---------- session & permissions ---------- */
 let currentUser = null;
 function scopeCovers(sc, pid){ if(!sc) return false; if(sc.scope === 'full') return true; if(sc.scope === 'branch') return (sc.branches || []).some(r => P(r) && inBranch(pid, r)); return false; }
-function canEdit(pid, u = currentUser){ if(!u || !P(pid)) return null; if(u.super || scopeCovers(u.perms.edit, pid)) return 'full'; if(u.personId === pid) return 'self'; return null; }
+/* A super admin's own record can be edited or deleted only by a super admin; other admins can suggest corrections. */
+const isSuperPerson = pid => DB.users.some(m => m.super && m.personId === pid);
+function canEdit(pid, u = currentUser){
+  if(!u || !P(pid)) return null;
+  if(u.super) return 'full';
+  if(u.personId === pid) return isSuperPerson(pid) ? 'self' : (scopeCovers(u.perms.edit, pid) ? 'full' : 'self');
+  if(isSuperPerson(pid)) return null;
+  return scopeCovers(u.perms.edit, pid) ? 'full' : null;
+}
 function canAddUnder(pid, u = currentUser){ return !!u && !!P(pid) && (u.super || scopeCovers(u.perms.add, pid)); }
 function canAddRoot(u = currentUser){ return !!u && (u.super || u.perms.add.scope === 'full'); }
 function hasAnyAdd(u = currentUser){ return !!u && (u.super || u.perms.add.scope === 'full' || (u.perms.add.scope === 'branch' && u.perms.add.branches.length > 0)); }
@@ -958,7 +966,7 @@ function clampCrop(){ cropState.tx = Math.min(0, Math.max(CROP_VIEWPORT - cropSt
 /* =====================================================================
    LOGIN
    ===================================================================== */
-const APP_VERSION = 'v11';
+const APP_VERSION = 'v12';
 let loginMode = 'in', loginBusy = false;
 function renderLogin(){
   const up = loginMode === 'up';
@@ -1275,7 +1283,7 @@ function openProfile(id){
   if(cap !== 'full') acts.push(btn('suggest', id, '📝 ' + esc(L('اقتراح تصحيح', 'Suggest a correction')), 'ghost'));
   if(cap === 'full' && p.parentUnion && childrenOfUnion(p.parentUnion).length > 1){ acts.push(btn('moveSib', id + '|-1', '↑ ' + esc(L('تقديم في ترتيب الإخوة', 'Move earlier')), 'ghost')); acts.push(btn('moveSib', id + '|1', '↓ ' + esc(L('تأخير في ترتيب الإخوة', 'Move later')), 'ghost')); }
   acts.push(btn('pickRoot', id, '🌳 ' + esc(L('عرض الشجرة من هنا', 'View tree from here')), 'ghost'));
-  if(cap === 'full') acts.push(btn('deletePerson', id, '🗑 ' + esc(L('حذف', 'Delete')), 'danger'));
+  if(cap === 'full' && (currentUser.super || !linkedToMember(id))) acts.push(btn('deletePerson', id, '🗑 ' + esc(L('حذف', 'Delete')), 'danger'));
   h += `<div class="action-grid">${acts.join('')}</div>`;
   if(cap === 'full'){
     const hist = DB.audit.filter(a => a.pid === id).slice(0, 15);
@@ -1386,8 +1394,10 @@ ACT.moveSib = arg => {
   if(j < 0 || j >= sibs.length){ toast(L('لا يمكن التحريك أكثر', 'Cannot move further')); return; }
   beginChange(); [sibs[i], sibs[j]] = [sibs[j], sibs[i]]; sibs.forEach((s, k) => s.order = k); log('reorder', pid, ''); commit(); openProfile(pid);
 };
+const linkedToMember = pid => DB.users.some(m => m.personId === pid);
 ACT.deletePerson = pid => {
   if(canEdit(pid) !== 'full') return toast(DENIED());
+  if(!currentUser.super && linkedToMember(pid)) return toast(L('هذا الشخص مرتبط بحساب عضو؛ حذفه للأدمن الأعلى فقط.', 'This person is linked to a member account; only the super admin can delete them.'), 4000);
   if(childrenOf(pid).length) return toast(L('لا يمكن حذف شخص له أبناء مسجلون. انقل الأبناء أو احذفهم أولًا.', 'Cannot delete a person with recorded children. Move or delete the children first.'), 4000);
   confirmBox(L(`حذف «${name(pid)}» من الشجرة؟ لا يمكن التراجع عن الحذف من التطبيق.`, `Delete “${name(pid)}”? This cannot be undone from the app.`), () => {
     beginChange(); const nm = P(pid).name_ar;
