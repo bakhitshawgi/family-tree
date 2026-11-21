@@ -204,7 +204,7 @@
   /* OVERLAY / SHEET */
   .overlay{position:fixed;inset:0;background:rgba(20,26,33,0.55);z-index:100;display:none;align-items:flex-end;}
   .overlay.open{display:flex;}
-  .sheet{background:var(--paper);width:100%;max-height:92vh;overflow-y:auto;border-radius:22px 22px 0 0;padding-bottom:26px;animation:slideup .18s ease-out;max-width:560px;margin:0 auto;position:relative;}
+  .sheet{background:var(--paper);width:100%;max-height:92vh;max-height:calc(100dvh - 16px);overflow-y:auto;overscroll-behavior:contain;border-radius:22px 22px 0 0;padding-bottom:26px;animation:slideup .18s ease-out;max-width:560px;margin:0 auto;position:relative;}
   @keyframes slideup{from{transform:translateY(24px);opacity:0;}to{transform:translateY(0);opacity:1;}}
   .sheet-handle{width:38px;height:4px;background:var(--line);border-radius:99px;margin:10px auto;}
   .close-btn{position:absolute;top:12px;inset-inline-end:14px;background:var(--paper-raised);border:none;width:32px;height:32px;border-radius:50%;font-size:16px;cursor:pointer;color:var(--ink-soft);z-index:2;}
@@ -318,7 +318,7 @@
   @media (min-width:640px){
     .container{max-width:640px;}
     .bottom-nav{max-width:640px;margin:0 auto;border-radius:20px 20px 0 0;}
-    .sheet{max-width:540px;border-radius:22px;margin:24px auto;max-height:88vh;}
+    .sheet{max-width:540px;border-radius:22px;margin:24px auto;max-height:88vh;max-height:calc(100dvh - 48px);}
     .overlay{align-items:center;padding:20px;}
     .stats-grid{grid-template-columns:repeat(4,1fr);}
   }
@@ -818,7 +818,7 @@ function toast(msg, ms){ const el = $('toast'); el.textContent = msg; el.style.d
    instead of leaving the app. */
 const ovNav = { stack:[], reopen:null, back:false, hist:false, ignorePop:false };
 const ovIsOpen = () => $('ov').classList.contains('open');
-function ovBackLabel(){ const b = $('ovBack'), top = ovNav.stack[ovNav.stack.length - 1]; b.classList.toggle('hidden', !top); if(top) b.textContent = L('→ رجوع', '← Back') + (top.label ? ' · ' + top.label : ''); $('ovClose').setAttribute('aria-label', L('إغلاق', 'Close')); }
+function ovBackLabel(){ const b = $('ovBack'), top = ovNav.stack[ovNav.stack.length - 1]; b.classList.remove('hidden'); b.textContent = L('→ رجوع', '← Back') + (top && top.label ? ' · ' + top.label : ''); $('ovClose').setAttribute('aria-label', L('إغلاق', 'Close')); }
 function openOv(html, after, reopen){
   if(ovIsOpen() && !ovNav.back && ovNav.reopen) ovNav.stack.push(ovNav.reopen);
   ovNav.back = false; ovNav.reopen = reopen || null;
@@ -1019,7 +1019,7 @@ function clampCrop(){ cropState.tx = Math.min(0, Math.max(CROP_VIEWPORT - cropSt
 /* =====================================================================
    LOGIN
    ===================================================================== */
-const APP_VERSION = 'v13';
+const APP_VERSION = 'v14';
 let loginMode = 'in', loginBusy = false;
 function renderLogin(){
   const up = loginMode === 'up';
