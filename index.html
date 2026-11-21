@@ -1045,7 +1045,7 @@ function clampCrop(){ cropState.tx = Math.min(0, Math.max(CROP_VIEWPORT - cropSt
 /* =====================================================================
    LOGIN
    ===================================================================== */
-const APP_VERSION = 'v19';
+const APP_VERSION = 'v20';
 let loginMode = 'in', loginBusy = false;
 function renderLogin(){
   const up = loginMode === 'up';
@@ -1906,6 +1906,7 @@ ACT.importForm = () => {
 };
 function buildImportPlan(text){
   let d; try{ d = JSON.parse(text); }catch(e){ throw L('الملف ليس JSON صحيحًا', 'Not valid JSON'); }
+  if(d && Array.isArray(d.people) && !d.unions) d.unions = [];
   if(!d || !Array.isArray(d.people) || !Array.isArray(d.unions)) throw L('الملف يجب أن يحتوي people و unions', 'File must contain people and unions');
   const byKey = {};
   d.people.forEach(x => {
@@ -1968,7 +1969,8 @@ function buildImportPlan(text){
     });
     unions.push({ id:uidv, isNew:!same, partners:parts, kids });
   }
-  return { byKey, ids, matched, fresh, unions, problems, moves };
+  const fillEn = matched.filter(([x, id]) => String(x.name_en || '').trim() && !String(P(id).name_en || '').trim()).map(([x, id]) => [id, String(x.name_en).trim()]);
+  return { byKey, ids, matched, fresh, unions, problems, moves, fillEn };
 }
 ACT.importPreview = () => {
   try{
@@ -1977,6 +1979,7 @@ ACT.importPreview = () => {
     $('imp_preview').innerHTML = `<div class="info-card"><h3>${esc(L('المعاينة', 'Preview'))}</h3>
       <p class="small">${esc(L(`${pl.fresh.length} شخصًا جديدًا · ${pl.matched.length} موجودون مسبقًا · ${nu} زواجًا جديدًا · ${links} رابط أبوة`, `${pl.fresh.length} new people · ${pl.matched.length} already in the tree · ${nu} new marriages · ${links} parent links`))}</p>
       ${pl.matched.length ? `<p class="section-title">${esc(L('سيُربطون بالموجودين (لن يُكرَّروا)', 'Linked to existing (not duplicated)'))}</p><p class="small">${pl.matched.map(([x, id]) => esc(x.name_ar) + ' ← ' + esc(name(id))).join('<br>')}</p>` : ''}
+      ${pl.fillEn.length ? `<p class="section-title">🔤 ${esc(L('سيُضاف الاسم الإنجليزي (كان فارغًا)', 'English name added (was empty)'))}</p><p class="small" dir="ltr" style="text-align:start">${pl.fillEn.map(([id, en]) => esc(en)).join(' · ')}</p>` : ''}
       ${pl.moves.length ? `<p class="section-title">🔗 ${esc(L('سيُنقلون إلى زواج والديهم الكامل', 'Moved into their parents’ full marriage'))}</p><p class="small">${pl.moves.map(([cid]) => esc(name(cid))).join('، ')}</p>` : ''}
       ${pl.problems.length ? `<p class="section-title">⚠️ ${esc(L('تنبيهات', 'Warnings'))}</p><p class="small">${pl.problems.map(esc).join('<br>')}</p>` : ''}
       <p class="section-title">${esc(L('الجدد', 'New people'))}</p><p class="small">${pl.fresh.map(x => esc(x.name_ar) + (x.name_en ? ` <span class="muted">(${esc(x.name_en)})</span>` : '')).join('، ')}</p>
@@ -1985,8 +1988,9 @@ ACT.importPreview = () => {
 };
 ACT.importApply = () => {
   const pl = importPlan; if(!pl || !mustSuper()) return;
-  confirmBox(L(`إضافة ${pl.fresh.length} شخصًا إلى الشجرة؟`, `Add ${pl.fresh.length} people to the tree?`), () => {
+  confirmBox(pl.fresh.length ? L(`إضافة ${pl.fresh.length} شخصًا إلى الشجرة؟`, `Add ${pl.fresh.length} people to the tree?`) : L('حفظ التحديثات؟', 'Save the updates?'), () => {
     beginChange();
+    pl.fillEn.forEach(([id, en]) => { if(P(id) && !String(P(id).name_en || '').trim()) P(id).name_en = en; });
     const yd = y => (Number.isInteger(y) ? { y, m:null, d:null, cal:'g', approx:false } : null);
     pl.fresh.forEach(x => {
       const living = x.living !== false;
