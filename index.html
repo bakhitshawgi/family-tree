@@ -367,6 +367,10 @@
   .sheet-bar .close-btn{position:static;width:40px;height:40px;margin-inline-start:auto;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;background:var(--raised-2);color:var(--ink);border:1.5px solid var(--line);box-shadow:none;}
   .sheet-back{background:var(--raised-2);color:var(--ink);border:1.5px solid var(--line);border-radius:999px;height:40px;padding:0 16px;font-weight:800;font-size:14px;cursor:pointer;white-space:nowrap;max-width:65%;overflow:hidden;text-overflow:ellipsis;}
   .sheet-header{padding-top:14px;}
+  .sheet-bar{padding-top:18px;min-height:68px;}
+  .sheet-bar .sheet-handle{top:7px;}
+  .photo-actions{display:flex;gap:6px;justify-content:center;margin:-2px 0 10px;}
+  .photo-actions .mini-btn{background:var(--raised-2);color:var(--ink);border-radius:999px;padding:6px 12px;}
   .ts-btn{min-width:34px;padding:0 8px;font-size:13px;}
   .icon-btn:disabled{opacity:.35;cursor:default;}
   .login-lang #loginThemeBtn{padding:6px 10px;}
@@ -594,7 +598,7 @@ async function reload(force){
   const g = gen, { data, error } = await sb.rpc('load_all');
   if(error || !data){ if(currentUser) toast(serverMsg(error), 5000); return false; }
   if(!force && g !== gen) return false;
-  applyServer(data); lastLoad = Date.now(); return true;
+  applyServer(data); applyPhotos(); lastLoad = Date.now(); return true;
 }
 const AUDIT_COL = { birth_y:'birth', birth_m:'birth', birth_d:'birth', birth_cal:'birth', birth_approx:'birth', death_y:'death', death_m:'death', death_d:'death', death_cal:'death', death_approx:'death',
   parent_union:'parentUnion', contact_visibility:'privacy', photo_visibility:'privacy', status_unknown:'living', sort_order:null, updated_at:null, consent_at:null };
@@ -926,6 +930,54 @@ function unionOptionsFor(personId, preset){
 }
 
 /* ---------- crop ---------- */
+/* ---------- profile photos (Supabase Storage, private bucket, one file per person: <personId>.jpg) ---------- */
+const PHOTO_BUCKET = 'family-photos';
+let PHOTOS = {}, photosReady = null;
+function applyPhotos(){ for(const p of Object.values(DB.persons)) p.photo = PHOTOS[p.id] || ''; }
+async function loadPhotos(){
+  try{
+    const st = sb.storage.from(PHOTO_BUCKET), files = [];
+    for(let off = 0; ; off += 1000){
+      const { data, error } = await st.list('', { limit:1000, offset:off }); if(error) throw error;
+      files.push(...data.filter(f => /\.jpg$/.test(f.name))); if(data.length < 1000) break;
+    }
+    const map = {};
+    if(files.length){
+      const { data, error } = await st.createSignedUrls(files.map(f => f.name), 60 * 60 * 12); if(error) throw error;
+      data.forEach(d => { if(d.signedUrl) map[d.path.replace(/\.jpg$/, '')] = d.signedUrl; });
+    }
+    PHOTOS = map; photosReady = true; applyPhotos(); if(currentUser) renderAll();
+  }catch(e){ photosReady = false; }
+}
+const photoSetupMsg = () => L('تخزين الصور غير مُعدّ بعد في Supabase. راجع مشرف التطبيق.', 'Photo storage is not set up in Supabase yet. Ask the app admin.');
+function photoAllowed(id){ const c = canEdit(id); return c === 'full' || c === 'self'; }
+ACT.photoPick = id => {
+  if(!photoAllowed(id)) return toast(DENIED());
+  const fi = document.createElement('input'); fi.type = 'file'; fi.accept = 'image/*';
+  fi.onchange = () => { const file = fi.files[0]; if(!file) return; if(!/^image\//.test(file.type)) return toast(L('الملف ليس صورة', 'Not an image'));
+    const r = new FileReader(); r.onload = () => openCropper(r.result, 'up:' + id); r.readAsDataURL(file); };
+  fi.click();
+};
+async function uploadPhoto(id, canvas){
+  if(!photoAllowed(id)) return toast(DENIED());
+  toast(L('جارٍ رفع الصورة…', 'Uploading photo…'), 8000);
+  try{
+    const blob = await new Promise(res => canvas.toBlob(res, 'image/jpeg', 0.85));
+    const st = sb.storage.from(PHOTO_BUCKET);
+    const up = await st.upload(id + '.jpg', blob, { upsert:true, contentType:'image/jpeg', cacheControl:'3600' }); if(up.error) throw up.error;
+    const sg = await st.createSignedUrl(id + '.jpg', 60 * 60 * 12); if(sg.error) throw sg.error;
+    PHOTOS[id] = sg.data.signedUrl; applyPhotos(); renderAll(); toast(L('تم حفظ الصورة ✓', 'Photo saved ✓'));
+    if(ovIsOpen()){ ovNav.back = true; openProfile(id); }
+  }catch(e){ toast(/bucket|not found|row-level|policy|unauthorized|403|404/i.test(String(e && (e.message || e.statusCode))) ? photoSetupMsg() : serverMsg(e), 6000); }
+}
+ACT.photoRemove = id => {
+  if(!photoAllowed(id)) return toast(DENIED());
+  confirmBox(L('إزالة الصورة؟', 'Remove the photo?'), async () => {
+    const { error } = await sb.storage.from(PHOTO_BUCKET).remove([id + '.jpg']);
+    if(error) return toast(serverMsg(error), 6000);
+    delete PHOTOS[id]; applyPhotos(); renderAll(); if(ovIsOpen()){ ovNav.back = true; openProfile(id); }
+  }, L('إزالة', 'Remove'));
+};
 const CROP_VIEWPORT = 240;
 let cropState = { w:0, h:0, scale:1, tx:0, ty:0, dragging:false, sx:0, sy:0, prefix:null };
 function openCropper(dataUrl, prefix){
@@ -953,8 +1005,9 @@ function clampCrop(){ cropState.tx = Math.min(0, Math.max(CROP_VIEWPORT - cropSt
   $('cropZoom').addEventListener('input', function(){ const ns = parseFloat(this.value), c = CROP_VIEWPORT / 2; const rx = (c - cropState.tx) / cropState.scale, ry = (c - cropState.ty) / cropState.scale; cropState.scale = ns; cropState.tx = c - rx * ns; cropState.ty = c - ry * ns; clampCrop(); applyCrop(); });
   $('cropCancel').onclick = () => $('cropModal').classList.remove('open');
   $('cropSave').onclick = () => {
-    const OUT = 320, cv = document.createElement('canvas'); cv.width = OUT; cv.height = OUT;
+    const OUT = cropState.prefix && cropState.prefix.startsWith('up:') ? 480 : 320, cv = document.createElement('canvas'); cv.width = OUT; cv.height = OUT;
     cv.getContext('2d').drawImage($('cropImg'), -cropState.tx / cropState.scale, -cropState.ty / cropState.scale, CROP_VIEWPORT / cropState.scale, CROP_VIEWPORT / cropState.scale, 0, 0, OUT, OUT);
+    if(cropState.prefix && cropState.prefix.startsWith('up:')){ $('cropModal').classList.remove('open'); uploadPhoto(cropState.prefix.slice(3), cv); return; }
     const url = cv.toDataURL('image/jpeg', 0.82), pf = cropState.prefix;
     if($(pf + '_photo')) $(pf + '_photo').value = url;
     if($(pf + '_photo_preview')) $(pf + '_photo_preview').innerHTML = `<img src="${url}" alt="">`;
@@ -966,7 +1019,7 @@ function clampCrop(){ cropState.tx = Math.min(0, Math.max(CROP_VIEWPORT - cropSt
 /* =====================================================================
    LOGIN
    ===================================================================== */
-const APP_VERSION = 'v12';
+const APP_VERSION = 'v13';
 let loginMode = 'in', loginBusy = false;
 function renderLogin(){
   const up = loginMode === 'up';
@@ -1019,7 +1072,7 @@ ACT.login = async () => {
 };
 async function enterApp(){
   if(!(await reload(true)) || !currentUser) return false;
-  treeState.rootId = null; activeTab = 'tabTree'; undoStack.length = 0;
+  treeState.rootId = null; activeTab = 'tabTree'; undoStack.length = 0; loadPhotos();
   $('loginScreen').style.display = 'none'; $('appShell').style.display = 'block'; $('loginPassword').value = ''; $('loginInvite').value = '';
   renderAll(); return true;
 }
@@ -1246,7 +1299,9 @@ function openProfile(id){
   const me = P(currentUser.personId) ? currentUser.personId : null, cap = canEdit(id);
   const rel = me ? relationText(me, id) : null, block = contactBlockReason(p);
   const img = canSeePhoto(p) && safeImg(p.photo);
+  const canPhoto = cap === 'full' || cap === 'self';
   let h = `<div class="sheet-header"><div class="sheet-avatar">${img ? `<img src="${esc(img)}" alt="">` : genderIcon(p)}</div>
+    ${canPhoto ? `<div class="photo-actions"><button class="mini-btn" data-act="photoPick" data-arg="${esc(id)}">📷 ${esc(p.photo ? L('تغيير الصورة', 'Change photo') : L('إضافة صورة', 'Add photo'))}</button>${p.photo ? `<button class="mini-btn" data-act="photoRemove" data-arg="${esc(id)}">${esc(L('إزالة', 'Remove'))}</button>` : ''}</div>` : ''}
     <h2 class="sheet-name">${esc(name(id))}</h2><div class="sheet-name-alt">${esc(lang === 'ar' ? p.name_en : p.name_ar)}</div>
     <div class="pill-row">${statusPill(p)}${isMinor(p) ? `<span class="status-pill minor">${esc(L('قاصر — بيانات محمية', 'Minor — protected'))}</span>` : ''}${p.living && !isMinor(p) && !p.consent ? `<span class="status-pill pending">${esc(L('لم يوافق بعد على عرض بياناته', 'Consent pending'))}</span>` : ''}</div>
     ${rel ? `<div class="rel-line">🧭 ${esc(L('صلته بك: ', 'Relation to you: '))}<b>${esc(rel)}</b></div>` : ''}</div>`;
@@ -1822,6 +1877,8 @@ applyDir(); applyTheme();
   try{ const { data } = await sb.auth.getSession(); if(data && data.session && !(await enterApp())) await sb.auth.signOut(); }catch(e){}
 })();
 document.addEventListener('visibilitychange', () => { if(!document.hidden && currentUser && Date.now() - lastLoad > 60000) queueReload(); });
+let photosAt = Date.now();
+document.addEventListener('visibilitychange', () => { if(!document.hidden && currentUser && Date.now() - photosAt > 6 * 3600 * 1000){ photosAt = Date.now(); loadPhotos(); } });
 if('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});
 
 </script>
